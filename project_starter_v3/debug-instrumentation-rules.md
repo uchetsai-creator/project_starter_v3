@@ -1,453 +1,219 @@
 # Debug Instrumentation Rules
 
+Framework-agnostic. Map each layer below to whatever your stack actually calls it
+(e.g. "Controller" might be a Django view, an Express route handler, a Go HTTP handler,
+or a Spring `@RestController` method — the placement and intent are the same).
+
+## Before Starting: Ask About the Stack
+
+Before instrumenting a flow, ask the user (unless already established earlier in this
+conversation or documented in docs/architecture/backend.md / frontend.md):
+
+1. **Language/framework** for this flow (e.g. "Express + Prisma", "Django", "Go net/http",
+   "vanilla CLI in Python")
+2. **Logging mechanism** to use — project's existing logger, or plain print/console statements
+   if none exists
+3. **Which layers from the list below apply** to this specific flow — skip asking about layers
+   that obviously don't apply (e.g. don't ask about "Client-Side Request Preparation" for a
+   backend-only cron job), but confirm the ones that are ambiguous
+
+Once the stack is known, instrument using that language's actual syntax and the project's real
+function/file names — not placeholder pseudocode. The examples in each layer below are
+illustrative only; replace them with what the target codebase actually looks like.
+
+If the same stack is used repeatedly in a session, do not re-ask each time — confirm once and
+reuse for subsequent flows unless the user switches stacks.
+
 ## Requirements
+
 * Do not modify business logic.
 * Do not add instrumentation to files that are not listed in the selected module-data-flow.
-* Clearly mark all debug code with `// DEBUG:` comments.
-* Print the key data being passed between layers.
+* Clearly mark all debug code with a `DEBUG:` comment/marker in the language's native comment syntax.
+* Print the key data being passed between layers — not everything, just enough to trace the flow.
+* Use the project's actual logging/print mechanism (`console.log`, `print`, `fmt.Println`,
+  `logger.debug`, etc.) — whatever the language and project already use.
+* Only add instrumentation for layers that exist in the code being instrumented. Skip any layer
+  below that has no equivalent in this stack or this particular flow.
 
 ## Debug Format
 
-```ts
-// DEBUG: <Flow Name> - <Step Name>
-console.group("<Flow Name> - <Step Name>");
-console.log("<Label>", value);
-console.groupEnd();
-debugger;
+```
+DEBUG: <Flow Name> - <Step Name>
+<group/indent start, if the language supports it>
+print("<Label>", value)
+<group/indent end>
 ```
 
-Backend code should use `console.group` and `console.log`. Add `debugger` only when explicitly requested.
+Use the language's native grouping mechanism if one exists (e.g. `console.group` in JS,
+indentation + a clear prefix in Python, structured log fields in Go). If none exists, a single
+prefixed line per piece of data is fine. Add a breakpoint/debugger statement only when explicitly
+requested.
 
-## Instrumentation Format 
-* Only add instrumentation for steps that exist in code.
+---
 
-### 1. Frontend Form Component
+## Layers
 
-Add in the form submit handler.
+Each layer lists: where to place the instrumentation, and what data to print. Map the layer name
+to whatever your framework calls that concept.
 
-Placement:
-Immediately after `new FormData(event.currentTarget)` and before calling `onSubmit`.
+### 1. Entry Point (UI event, CLI command, or request handler)
 
-Print:
+Where a user action or external trigger first enters the code — a form submit handler, a button
+click, a CLI command parser, or the first line of an HTTP route handler.
 
-* FormData contents using `Object.fromEntries(formData.entries())`
-
-Example:
-
-```ts
-const formData = new FormData(event.currentTarget);
-
-// DEBUG: <Flow Name> - Form Submit
-console.group("<Flow Name> - Form Submit");
-console.log("FormData", Object.fromEntries(formData.entries()));
-console.groupEnd();
-debugger;
-
-onSubmit(formData);
-```
-
-### 2. Page Submit Handler
-
-Add before calling mutation.
-
-Placement:
-Immediately before `createMutation.mutate(...)`, `updateMutation.mutate(...)`, or equivalent.
+Placement: immediately after the triggering input is captured, before any processing begins.
 
 Print:
+* The raw input as received (form data, CLI args, request body/params/query)
 
-* Mutation payload
+### 2. Client-Side Request Preparation (if applicable)
 
-Example:
+Where a frontend or client assembles the payload before sending it onward — building a request
+body, preparing a mutation payload, assembling a CLI subprocess call.
 
-```ts
-const payload = {
-  ...
-};
-
-// DEBUG: <Flow Name> - Mutation Payload
-console.group("<Flow Name> - Mutation Payload");
-console.log("Payload", payload);
-console.groupEnd();
-debugger;
-
-createMutation.mutate(payload);
-```
-
-### 3. React Query Hook
-
-Add inside `mutationFn` or `queryFn`.
-
-Placement:
-As the first statement inside `mutationFn` or `queryFn`.
+Placement: immediately before the outgoing call is made.
 
 Print:
+* The assembled payload/arguments
 
-* Hook input
-* Query filters, if applicable
+Skip this layer entirely for server-only or CLI-only flows with no client/server split.
 
-Example:
+### 3. Outbound Call (HTTP request, RPC, queue publish, subprocess call)
 
-```ts
-mutationFn: async (input) => {
-  // DEBUG: <Flow Name> - Hook Mutation
-  console.group("<Flow Name> - Hook Mutation");
-  console.log("Input", input);
-  console.groupEnd();
-  debugger;
+Where the client/caller actually sends the request to the next layer.
 
-  return createEntity(input);
-}
-```
-
-### 4. Frontend API Function
-
-Add before the HTTP request.
-
-Placement:
-Immediately before `fetch`, `api.get`, `api.post`, `api.patch`, or equivalent.
+Placement: immediately before, and immediately after, the call.
 
 Print:
+* Before: destination (URL/endpoint/queue name), method/verb, payload
+* After: raw response or result received
 
-* Request URL
-* Request method
-* Request body
-* Query params, if applicable
+Skip if the flow is a single process with no network/IPC boundary.
 
-Example:
+### 4. Request Handling Entry (server-side entry point)
 
-```ts
-// DEBUG: <Flow Name> - API Request
-console.group("<Flow Name> - API Request");
-console.log("URL", url);
-console.log("Method", "POST");
-console.log("Body", body);
-console.groupEnd();
-debugger;
+Where the receiving side first gets the request — a controller method, a route handler, a queue
+consumer, a CLI command's main function.
 
-const response = await fetch(url, {
-  method: "POST",
-  body: JSON.stringify(body)
-});
-```
-
-Add after the HTTP response is parsed.
-
-Placement:
-Immediately after response JSON is parsed and before returning.
+Placement: first statement inside the handler.
 
 Print:
+* Path/route params, query params, request body (or equivalent: command args, message payload)
 
-* Response body
+### 5. Validation
 
-Example:
+Where input is validated or parsed against a schema.
 
-```ts
-const result = await response.json();
-
-// DEBUG: <Flow Name> - API Response
-console.group("<Flow Name> - API Response");
-console.log("Response", result);
-console.groupEnd();
-debugger;
-
-return result;
-```
-
-### 5. Backend Router
-
-Usually do not add logs here unless the flow needs route matching confirmation.
-
-If needed, add before calling the controller.
+Placement: immediately after validation/parsing completes.
 
 Print:
+* The validated/normalized data (not the raw input again — show what survived validation)
 
-* HTTP method
-* Route path
-* Route params
+Skip if there is no formal validation step.
 
-### 6. Controller Request
+### 6. Business Logic Entry
 
-Add at the beginning of the controller method.
+Where the core business logic begins — a service method, a use-case function, a domain handler.
 
-Placement:
-First statement inside the controller function.
+Placement: first statement inside the function.
 
 Print:
+* The input the business logic receives
+* Any identifiers needed to trace this call (user ID, resource ID, etc.)
 
-* `request.params`
-* `request.query`
-* `request.body`
+### 7. Business Rule Decisions
 
-Example:
+Any point where a business rule, conditional check, or decision determines the outcome —
+a duplicate check, an authorization decision, an availability check, an approval threshold.
 
-```ts
-export async function postEntity(request: Request, response: Response) {
-  // DEBUG: <Flow Name> - Controller Request
-  console.group("<Flow Name> - Controller Request");
-  console.log("Params", request.params);
-  console.log("Query", request.query);
-  console.log("Request Body", request.body);
-  console.groupEnd();
-
-  ...
-}
-```
-
-### 7. Controller Validation
-
-Add immediately after schema validation.
-
-Placement:
-Immediately after `schema.parse(...)`.
+Placement: immediately after the check/decision is made.
 
 Print:
+* The input to the decision
+* The result of the check
+* The outcome/branch taken
 
-* Validated params
-* Validated query
-* Validated body
+This is one of the most valuable instrumentation points — include it at every meaningful
+decision branch, not just the first one.
 
-Example:
+### 8. Data Access — Read
 
-```ts
-const body = createEntityBodySchema.parse(request.body);
+Where data is fetched from a database, cache, file, or external store.
 
-// DEBUG: <Flow Name> - Controller Validation
-console.group("<Flow Name> - Controller Validation");
-console.log("Validated Body", body);
-console.groupEnd();
-```
-
-### 8. Service Input
-
-Add at the beginning of the service method.
-
-Placement:
-First statement inside the service function.
+Placement: immediately before, and immediately after, the read.
 
 Print:
+* Before: the query/lookup parameters (filter, key, query string)
+* After: what was returned (or "not found")
 
-* Service input
-* Important IDs
+### 9. Data Access — Write
 
-Example:
+Where data is created, updated, or deleted in a database, cache, file, or external store.
 
-```ts
-export async function createEntity(input: CreateEntityInput) {
-  // DEBUG: <Flow Name> - Service Input
-  console.group("<Flow Name> - Service Input");
-  console.log("Input", input);
-  console.groupEnd();
-
-  ...
-}
-```
-
-### 9. Service Business Rule Decision
-
-Add immediately after a business-rule check or decision.
-
-Placement:
-Immediately after duplicate check, availability check, validation decision, approval decision, or allocation decision.
+Placement: immediately before the write.
 
 Print:
+* What is being written (the payload, the target identifier, the operation type)
 
-* Rule input
-* Rule result
-* Decision outcome
+### 10. Transactional Boundaries (if applicable)
 
-Example:
+Where multiple writes are grouped into a single atomic operation.
 
-```ts
-const existing = await repository.findByCode(input.code);
-
-// DEBUG: <Flow Name> - Duplicate Check
-console.group("<Flow Name> - Duplicate Check");
-console.log("Result", existing);
-console.log("Decision", existing ? "Reject duplicate" : "Allow create");
-console.groupEnd();
-```
-
-### 10. Repository Lookup
-
-Add before the database lookup.
-
-Placement:
-Immediately before `prisma.*.findUnique`, `findFirst`, or `findMany`.
+Placement: immediately before starting the transaction, and at commit/rollback.
 
 Print:
+* What operations are included
+* Commit success, or the rollback reason on failure
 
-* Lookup parameters
-* Prisma `where` or filter object
+Skip if the flow has no multi-step atomic operation.
 
-Example:
+### 11. Response Construction
 
-```ts
-const where = { code };
+Where the result is shaped into whatever gets returned — a response DTO, a CLI exit message, a
+rendered template context.
 
-// DEBUG: <Flow Name> - Repository Lookup
-console.group("<Flow Name> - Repository Lookup");
-console.log("Parameters", where);
-console.groupEnd();
-
-const result = await prisma.entity.findUnique({ where });
-```
-
-### 11. Repository Lookup Result
-
-Add immediately after the database lookup returns.
-
-Placement:
-Immediately after `await prisma.*.findUnique`, `findFirst`, or `findMany`.
+Placement: immediately before the result is sent/returned.
 
 Print:
+* The shaped output
+* Status/exit code, if applicable
 
-* Lookup result
+### 12. Client-Side Result Handling (if applicable)
 
-Example:
+Where the caller receives and processes the result — parsing a response, handling a CLI exit
+code, consuming a queue acknowledgment.
 
-```ts
-const result = await prisma.entity.findUnique({ where });
-
-// DEBUG: <Flow Name> - Repository Lookup Result
-console.group("<Flow Name> - Repository Lookup Result");
-console.log("Result", result);
-console.groupEnd();
-
-return result;
-```
-
-### 12. Repository Create / Update / Delete
-
-Add immediately before database write.
-
-Placement:
-Immediately before `prisma.*.create`, `update`, `delete`, or transaction call.
+Placement: immediately after the result is received.
 
 Print:
+* The received result
 
-* Prisma payload
-* `where`
-* `data`
+### 13. State/Cache Invalidation (if applicable)
 
-Example:
+Where local state, a cache, or a derived view is invalidated or refreshed as a side effect of
+the operation succeeding.
 
-```ts
-const payload = {
-  data
-};
-
-// DEBUG: <Flow Name> - Repository Write
-console.group("<Flow Name> - Repository Write");
-console.log("Prisma Payload", payload);
-console.groupEnd();
-
-return prisma.entity.create(payload);
-```
-
-### 13. Prisma Transaction
-
-Add immediately before `$transaction`.
-
-Placement:
-Immediately before `prisma.$transaction(...)`.
+Placement: immediately before the invalidation/refresh call.
 
 Print:
+* What is being invalidated (cache key, state slice, UI region)
+* The triggering result, if relevant
 
-* Transaction input
-* Operations included
+Skip if the flow has no caching or derived-state layer.
 
-Example:
+### 14. UI/Output Refresh (if applicable)
 
-```ts
-// DEBUG: <Flow Name> - Prisma Transaction
-console.group("<Flow Name> - Prisma Transaction");
-console.log("Operations", ["inventory.update", "transactionLog.create"]);
-console.log("Input", input);
-console.groupEnd();
+Where the user-facing output changes as a result of the completed flow — clearing a form,
+re-rendering a list, printing a final CLI message.
 
-return prisma.$transaction(async (tx) => {
-  ...
-});
-```
-
-### 14. Controller Response
-
-Add immediately before sending the response.
-
-Placement:
-Immediately before `response.json(...)` or `response.status(...).json(...)`.
+Placement: immediately before the visible state change.
 
 Print:
+* The state before and after the change, if both are easily available
 
-* Response DTO
-* Status code
+Skip for pure backend/API flows with no UI.
 
-Example:
-
-```ts
-const dto = toEntityDto(result);
-
-// DEBUG: <Flow Name> - Controller Response
-console.group("<Flow Name> - Controller Response");
-console.log("Status", 201);
-console.log("Response DTO", dto);
-console.groupEnd();
-
-response.status(201).json(dto);
-```
-
-### 15. React Query Invalidation
-
-Add after successful mutation and before invalidating queries.
-
-Placement:
-Inside `onSuccess`, immediately before `queryClient.invalidateQueries(...)`.
-
-Print:
-
-* Query key
-* Mutation result, if available
-
-Example:
-
-```ts
-onSuccess: (result) => {
-  // DEBUG: <Flow Name> - React Query Invalidation
-  console.group("<Flow Name> - React Query Invalidation");
-  console.log("Result", result);
-  console.log("Query Key", ["entities"]);
-  console.groupEnd();
-  debugger;
-
-  queryClient.invalidateQueries({
-    queryKey: ["entities"]
-  });
-}
-```
-
-### 16. UI Refresh
-
-Add only when there is an explicit UI refresh action.
-
-Placement:
-Immediately before clearing form state, closing edit mode, resetting selection, or updating local state.
-
-Print:
-
-* State before update
-* State after update if available
-
-Example:
-
-```ts
-// DEBUG: <Flow Name> - UI Refresh
-console.group("<Flow Name> - UI Refresh");
-console.log("Clearing edit state", selectedEntity);
-console.groupEnd();
-debugger;
-
-setSelectedEntity(null);
-```
+---
 
 ## Completion Report
 
@@ -455,7 +221,7 @@ After implementation, report:
 
 * Flow instrumented
 * Files modified
-* Debug locations inserted
+* Which layers from the list above were actually used (and which were skipped, and why)
 * Data printed at each location
 * Expected execution order
 
@@ -465,30 +231,29 @@ Example:
 Flow instrumented:
 Create Location
 
+Layers used (this flow has no client/cache layer, so 2, 10, and 13 were skipped):
+1. Entry Point
+4. Request Handling Entry
+5. Validation
+6. Business Logic Entry
+7. Business Rule Decisions (duplicate check)
+8. Data Access — Read
+9. Data Access — Write
+11. Response Construction
+
 Files modified:
-- LocationCreateForm.tsx
-- LocationPage.tsx
-- locationHooks.ts
-- locationApi.ts
-- locations.controller.ts
-- locations.service.ts
-- locations.repository.ts
+- location_create_form.<ext>
+- location_controller.<ext>
+- location_service.<ext>
+- location_repository.<ext>
 
 Expected execution order:
-Only include steps that exist in the implementation flow.
-Form Submit
-→ Mutation Payload
-→ Hook Mutation
-→ API Request
-→ Controller Request
-→ Controller Validation
-→ Service Input
-→ Repository Lookup
-→ Repository Lookup Result
-→ Duplicate Check
-→ Repository Write
-→ Controller Response
-→ API Response
-→ React Query Invalidation
-→ UI Refresh
+Entry Point
+→ Request Handling Entry
+→ Validation
+→ Business Logic Entry
+→ Data Access — Read (duplicate check)
+→ Business Rule Decisions
+→ Data Access — Write
+→ Response Construction
 ```
