@@ -103,7 +103,9 @@ Run this check after every task — most of the time the answer will be "no," bu
     2. Ask: "Would you like to add debug instrumentation to this module? (follows debug-instrumentation-rules.md)"
        * If yes: follow debug-instrumentation-rules.md and instrument the module.
        * If no: continue.
-    3. Regenerate the merged documentation PDF by running `python3 docs/script/build_pdf.py docs -o docs/project-documentation.pdf`. No need to ask first — just run it.
+    3. Regenerate the English PDF: `python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
+     No need to ask first — just run it.
+     Chinese PDF (manual, only when requested): run `python3 docs/script/translate_docs.py docs --out docs-zh`, then `python3 docs/script/build_pdf.py docs-zh --lang zh -o docs/project-documentation-zh.pdf`..
 
 ### Document Update Checklist
 
