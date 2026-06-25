@@ -28,7 +28,7 @@ SECTION_ORDER = [
     ("flows", "Flows"),
 ]
 
-SKIP_DIRS = {"templates", "script"}  # script/ has no docs to render; templates/ is blank scaffolding
+SKIP_DIRS = {"templates", "script", "plans", "refactor", "rules"}  # internal planning/process docs — excluded from PDF
 
 
 def find_markdown_files(docs_dir):
@@ -141,7 +141,9 @@ def build_merged_markdown(docs_dir, html_svg_pairs, png_cache_dir):
 
         content = inject_diagrams(content, docs_dir, html_svg_pairs, png_cache_dir)
 
-        title = os.path.splitext(os.path.basename(rel))[0]
+        # Use the first # H1 heading from the file as the title; fall back to filename.
+        h1_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+        title = h1_match.group(1).strip() if h1_match else os.path.splitext(os.path.basename(rel))[0]
         toc_lines.append(f"  - {title} (`{rel}`)")
         body_parts.append(f"\n\n## {title}\n*`{rel}`*\n\n{content}")
 
