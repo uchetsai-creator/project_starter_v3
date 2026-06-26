@@ -59,7 +59,6 @@ Step 2 — Fill in architecture and spec documents (describe what exists):
 10. Create docs/business/business-objects.md — describe the actual business entities.
 11. Create docs/business/business-rules.md — describe the actual constraints enforced in code.
 12. Create docs/specs/research.md — document the technology choices already made and why (if known).
-13. Create docs/specs/quickstart.md — document how to actually run the project locally.
 
 Step 3 — Fill in module flow files (one module at a time):
 For each module found in Step 1:
@@ -182,7 +181,6 @@ Run this check after every task — most of the time the answer will be "no," bu
 Run through every item below after every task. This is mandatory, not optional.
 
 - [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update.
-- [ ] docs/specs/quickstart.md — did setup steps, verification steps, or environment requirements change? If yes, update.
 - [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then:
   - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file>`
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
