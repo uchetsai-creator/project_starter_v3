@@ -7,8 +7,8 @@ Run this after reading the codebase (Step 1), before writing any documents (Step
 
 ## Instructions
 
-After reading the entry point, schema, and one complete module, produce the report below.
-Do not start writing documents until the report is acknowledged by the user.
+After reading the entry point, data layer, and one complete vertical slice, produce the report below.
+Do not start writing documents until all High severity issues are resolved.
 
 ---
 
@@ -32,35 +32,34 @@ If an area has no issues, omit it from the table.
 
 ## Severity Guide
 
-| Severity | Meaning |
-|---|---|
-| High | Likely to cause bugs, security issues, or maintenance problems. Fix before documenting. |
-| Medium | Not urgent but worth fixing before the next feature is added. |
-| Low | Minor issue. Can be addressed later or noted and left as-is. |
+| Severity | Meaning | Action |
+|---|---|---|
+| High | Likely to cause bugs, security issues, or maintenance problems | Fix immediately before proceeding to Step 2 |
+| Medium | Not urgent but worth fixing before the next feature is added | Add to docs/project-plan.md as a task |
+| Low | Minor issue, can be addressed later | Add to docs/project-plan.md as a task |
 
 ---
 
 ## After the Report
 
-Ask the user:
+**High severity issues — fix immediately:**
+Fix them one by one before proceeding to Step 2. Follow AGENTS.md principles:
+Package First, no unrelated refactor, incremental changes only.
+After fixing, note what was changed in a brief summary (one line per fix).
 
-> "Would you like to fix any of these issues before we document the current state?
-> - If yes: tell me which ones and we will fix them first, then continue to Step 2.
-> - If no: we will document the codebase as-is and record the findings in docs/specs/research.md under a Known Issues section."
+**Medium and Low severity issues — add to project-plan:**
+For each Medium/Low finding, add a task to docs/project-plan.md under a
+`## Code Quality` sprint/section. Use this format:
 
-**If the user chooses to fix issues first:**
-Fix them module by module, following the same principles in AGENTS.md (Package First, no unrelated refactor, incremental changes). Then continue to Step 2.
-
-**If the user skips:**
-Add the following section to docs/specs/research.md before filling in any other content:
-
-```markdown
-## Known Issues
-
-The following issues were found during the initial code quality check.
-They were not fixed at the time of documentation and should be addressed in future tasks.
-
-| Area | Finding | Severity |
-|---|---|---|
-| [Area] | [Finding] | [Severity] |
 ```
+- [ ] [Area]: [Finding] — [Recommendation]
+```
+
+Example:
+```
+- [ ] Schema: Add index on orders.status — frequently queried without index
+- [ ] Naming: Standardise repository method names across modules
+```
+
+Do not mention these issues again after adding them to the plan.
+They will be handled as normal tasks during development.
