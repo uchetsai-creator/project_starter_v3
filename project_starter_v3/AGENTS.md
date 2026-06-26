@@ -18,6 +18,64 @@ If starting a new project:
 
 ---
 
+If retrofitting an existing project (code already exists, no docs yet):
+
+The goal is to describe what already exists — not to redesign it. Read the codebase first, then fill in the documents to reflect reality.
+
+Do not scan the entire repository at once. Work module by module.
+
+Step 1 — Understand the system (read before writing anything):
+1. Read the entry point (main file, router, app bootstrap) to understand the overall structure.
+2. Identify the main modules/features from the router or directory structure.
+3. Read the schema file (Prisma, SQL, ORM models) to understand the data model.
+4. Read one complete module (controller → service → repository) to understand the layering pattern.
+
+Step 1b — Code Quality Check:
+Read and follow code-quality-check.md. Do not proceed to Step 2 until the check is complete and acknowledged by the user.
+
+
+Step 2 — Fill in architecture and spec documents (describe what exists):
+1. Create docs/architecture/architecture.md — describe the actual components and data flows found.
+   Then run: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
+2. Create docs/architecture/backend.md — describe the actual stack, layering, and module pattern.
+   Then run: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
+3. Create docs/architecture/frontend.md (if applicable) — describe the actual frontend structure.
+   Then run: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
+4. Create docs/architecture/database.md — describe the actual entities and key relationships.
+5. Create docs/architecture/deployment.md — describe the actual services and startup flow.
+6. Create docs/specs/data-model.md — fill in from the actual schema file.
+   Then run: `python3 docs/script/schema_to_html.py <schema file>`
+   Then run: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
+7. Create docs/specs/api-contract.md — fill in from the actual routes and controllers.
+8. Create docs/specs/permissions.md — fill in from the actual auth middleware and role logic.
+   Then run: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
+9. Create docs/business/business-process.md — describe the actual business workflows supported.
+10. Create docs/business/business-objects.md — describe the actual business entities.
+11. Create docs/business/business-rules.md — describe the actual constraints enforced in code.
+12. Create docs/specs/research.md — document the technology choices already made and why (if known).
+13. Create docs/specs/quickstart.md — document how to actually run the project locally.
+
+Step 3 — Fill in module flow files (one module at a time):
+For each module found in Step 1:
+1. Create docs/modules/[module]/[module]-module-data-flow.md — trace the actual CRUD flows from
+   the existing code. Use real function names and file paths.
+   Then run: `python3 docs/script/class_to_html.py docs/modules/[module]/[module]-module-data-flow.md`
+2. Update docs/modules/module-data-flow.md index with the new module entry.
+3. Update docs/codebase-map.md with the files in this module.
+
+Step 4 — Fill in project status documents:
+1. Create docs/project-requirements.md — reconstruct from the actual features that exist.
+   Mark anything uncertain as [NEEDS CLARIFICATION].
+2. Create docs/project-plan.md — list all modules found. Mark all existing ones as completed.
+   Add any known remaining work as incomplete tasks.
+3. Create docs/current-state.md — set the Current Task to the next incomplete item in project-plan.md,
+   or write "Documentation retrofit complete — ready for new tasks" if everything is done.
+
+Step 5 — Generate the PDF:
+`python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
+
+---
+
 If continuing an existing project:
 Read:
 1. AGENTS.md
