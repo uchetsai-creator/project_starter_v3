@@ -21,6 +21,7 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
 project_starter_v3/                  ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
+├── code-quality-check.md            ← code review checklist for retrofitting existing projects
 └── templates/
     ├── project-requirements.md      ← project scope, goals, edge cases, acceptance criteria
     ├── project-plan.md              ← sprint/task breakdown (DB → BE → FE per feature)
@@ -121,6 +122,24 @@ When a task finishes **all** DB/BE/FE work for a module, three more things happe
   `docs/modules/[module]/log-[module].md` is created/updated
 - You're asked whether to add temporary debug instrumentation (per `debug-instrumentation-rules.md`)
 - The English PDF is regenerated (`docs/project-documentation-en.pdf`)
+
+---
+
+## Retrofitting an existing project
+
+If a project already has code but no documentation, use the retrofit flow in `AGENTS.md`
+(`If retrofitting an existing project`). The flow has five steps:
+
+1. **Read the codebase** — entry point, schema, one complete module
+2. **Code Quality Check** — the agent runs `code-quality-check.md` and produces a report
+   covering layering, Package First violations, naming, schema design, security, and error
+   handling. You decide whether to fix issues first or document the codebase as-is
+3. **Fill in architecture and spec documents** — describe what actually exists, not what should exist
+4. **Fill in module flow files** — one module at a time, using real function names and file paths
+5. **Fill in project status** — reconstruct requirements, mark existing modules as completed in
+   project-plan.md, generate the PDF
+
+`code-quality-check.md` can also be used independently at any time as a standalone code review checklist.
 
 ---
 
