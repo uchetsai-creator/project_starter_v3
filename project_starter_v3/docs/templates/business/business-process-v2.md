@@ -2,45 +2,51 @@
 
 Understand the business before understanding the system.
 
+---
+
 ## Business Goal
-What is the purpose of this business process?
+
+[What is the purpose of this business process? 1-3 sentences.]
+
+---
 
 ## Process Overview
+
 Describe high-level business workflows.
 
 Focus on:
-
 - Major business stages
 - Process sequence
 - Process ownership
 
 Do not describe:
-
 - Detailed execution steps
 - Validation logic
 - System behavior
 - Database actions
 
-Format:
-- Start -> Step -> Step -> End
+```
+Start → [Stage 1] → [Stage 2] → [Stage 3] → End
+```
+
+---
 
 ## Process Steps
-Step Name:
-Owner:
-Input:
-Action:
-Output:
-Next Step:
+
+| Step | Owner | Input | Action | Output | Next step |
+|---|---|---|---|---|---|
+| [Step name] | [Owner] | [Input] | [What happens] | [Output] | [Next step] |
+| [Step name] | [Owner] | [Input] | [What happens] | [Output] | [Next step] |
+
+---
 
 ## Decision Points
-Decision:
-Decision Maker:
-Input:
-Possible Outcomes:
-Next Process:
 
-For decisions with multiple branches or non-trivial logic,
-diagram it instead of using the table above:
+| Decision | Decision maker | Input | Possible outcomes |
+|---|---|---|---|
+| [e.g., Approve order?] | [Manager] | [Order amount, history] | Approved → next step / Rejected → notify user |
+
+For decisions with multiple branches or non-trivial logic, use a diagram instead:
 
 ```
 Trigger
@@ -52,17 +58,27 @@ Decision?
 └─ No  → Action B
 ```
 
+---
+
 ## Exceptions
-Exception:
-Cause:
-Handling Method:
-Responsible Role:
+
+| Exception | Cause | Handling method | Responsible role |
+|---|---|---|---|
+| [e.g., Payment timeout] | [External payment API unreachable] | [Retry 3x, then notify ops team] | [System / Ops] |
+| [Exception] | [Cause] | [How it is handled] | [Who handles it] |
+
+---
 
 ## Pain Points
-Current Problem:
-Impact:
-Current Workaround:
+
+| Current problem | Impact | Current workaround |
+|---|---|---|
+| [Problem] | [Impact on business] | [What people do today] |
+
+---
 
 ## Future Improvement Ideas
-Improvement:
-Expected Benefit:
+
+| Improvement | Expected benefit |
+|---|---|
+| [Idea] | [What it would improve] |
