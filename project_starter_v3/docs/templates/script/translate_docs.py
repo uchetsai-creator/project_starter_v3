@@ -45,7 +45,7 @@ PDF_ALLOWLIST = [
     ("business",       "business/business-rules.md"),
     ("business",       "business/business-objects.md"),
     ("business",       "business/business-process.md"),
-    ("flows",          "flows/module-data-flow.md"),
+    ("flows",          "modules/module-data-flow.md"),
     # flows/log-*.md added dynamically below
     ("project",        "codebase-map.md"),
 ]
@@ -57,7 +57,7 @@ DELAY     = 0.3    # seconds between API calls to avoid rate limiting
 def collect_files(docs_dir):
     rels = [rel for _, rel in PDF_ALLOWLIST]
     seen = set(rels)
-    for path in sorted(glob.glob(os.path.join(docs_dir, "flows", "log-*.md"))):
+    for path in sorted(glob.glob(os.path.join(docs_dir, "modules", "*", "*-module-data-flow.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
             # insert before last entry (codebase-map)
