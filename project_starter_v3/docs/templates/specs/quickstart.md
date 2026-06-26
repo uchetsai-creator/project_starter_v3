@@ -1,59 +1,59 @@
 # Quickstart
 
 <!--
-  說明如何從零跑起整個專案，並驗證功能正常。
-  不包含實作細節，只有「怎麼跑」和「預期看到什麼」。
+  Describes how to run the project from scratch and verify it is working correctly.
+  Does not include implementation details — only "how to run" and "what to expect".
 -->
 
 ## Prerequisites
 
-* [環境需求，e.g., Node 22+、Docker、PostgreSQL]
-* [需要的環境變數或設定]
+* [Environment requirements, e.g., Node 22+, Docker, PostgreSQL]
+* [Required environment variables or configuration]
 
 ---
 
 ## Setup
 
-- [ ] **Step 1: [步驟名稱，e.g., 安裝依賴]**
+- [ ] **Step 1: [Step name, e.g., Install dependencies]**
   ```bash
-  [指令]
+  [command]
   ```
 
-- [ ] **Step 2: [步驟名稱，e.g., 設定環境變數]**
+- [ ] **Step 2: [Step name, e.g., Configure environment variables]**
   ```bash
-  [指令]
+  [command]
   ```
 
-- [ ] **Step 3: [步驟名稱，e.g., 執行 migration]**
+- [ ] **Step 3: [Step name, e.g., Run migrations]**
   ```bash
-  [指令]
+  [command]
   ```
 
-- [ ] **Step 4: [步驟名稱，e.g., 啟動服務]**
+- [ ] **Step 4: [Step name, e.g., Start services]**
   ```bash
-  [指令]
+  [command]
   ```
 
 ---
 
 ## Verification
 
-- [ ] **[功能名稱] — [驗證描述]**
+- [ ] **[Feature name] — [Verification description]**
   ```bash
-  [驗證指令]
+  [verification command]
   ```
-  Expected: [預期輸出]
+  Expected: [expected output]
 
-- [ ] **[功能名稱] — [驗證描述]**
+- [ ] **[Feature name] — [Verification description]**
   ```bash
-  [驗證指令]
+  [verification command]
   ```
-  Expected: [預期輸出]
+  Expected: [expected output]
 
 ---
 
 ## Teardown
 
 ```bash
-[停止服務的指令]
+[command to stop services]
 ```
