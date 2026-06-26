@@ -12,7 +12,7 @@
 * After implementation, update the matching module flow file with actual function names and file paths.
 * If no matching implementation flow exists, create one.
 * Each module flow file must include a class block describing the code structure.
-* After writing, run: python3 docs/script/class_to_html.py <module-flow-file>
+* After writing, run: python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md
 
 ### CRUD Rules
 
@@ -95,16 +95,27 @@ class [Repository] {
 
 ## Module Flow Files
 
-File naming convention: `[module-name]-module-data-flow.md`
+Each module has its own subfolder under `docs/modules/`.
+
+Folder and file naming convention:
+```
+docs/modules/
+├── module-data-flow.md          ← this index file
+└── [module-name]/
+    ├── [module-name]-module-data-flow.md
+    └── log-[module-name].md
+```
 
 Examples:
-- `order-module-data-flow.md`
-- `inventory-module-data-flow.md`
-- `payment-module-data-flow.md`
+```
+docs/modules/order/order-module-data-flow.md
+docs/modules/inventory/inventory-module-data-flow.md
+docs/modules/payment/payment-module-data-flow.md
+```
 
-Files matching this pattern are automatically included in the PDF.
+Files matching `*-module-data-flow.md` are automatically included in the PDF.
 
-| Module | File |
-|---|---|
-| [e.g., Order] | `docs/flows/order-module-data-flow.md` |
-| [module] | `docs/flows/[module-name]-module-data-flow.md` |
+| Module | Folder | Flow file |
+|---|---|---|
+| [e.g., Order] | `docs/modules/order/` | `order-module-data-flow.md` |
+| [module] | `docs/modules/[module]/` | `[module]-module-data-flow.md` |
