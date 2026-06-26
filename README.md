@@ -18,7 +18,7 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
    following the checklist in `AGENTS.md`.
 
 ```
-project_starter_v3                   ← this repo (template only)
+project_starter_v3/                  ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
 └── templates/
@@ -48,7 +48,7 @@ project_starter_v3                   ← this repo (template only)
     │   ├── business-objects.md      ← entities, relationships, status flow
     │   └── business-rules.md        ← approval/validation/notification/audit rules
     │
-    ├── flows/
+    ├── modules/
     │   ├── module-data-flow.md      ← index + rules for code-level flow files (per module)
     │   └── module-flow.md           ← detailed execution steps for a business process
     │
@@ -88,9 +88,12 @@ new_project/
     ├── specs/
     ├── architecture/
     ├── business/
-    ├── flows/
-    │   ├── [module]-module-data-flow.md  ← created per module during development
-    │   └── log-<module-name>.md          ← created when each module completes
+    ├── modules/
+    │   ├── module-data-flow.md            ← index file
+    │   ├── module-flow.md                 ← shared process flow template
+    │   └── [module-name]/                 ← one subfolder per module
+    │       ├── [module]-module-data-flow.md  ← auto-included in PDF
+    │       └── log-[module].md               ← not in PDF, dev reference only
     └── script/
 ```
 
@@ -115,7 +118,7 @@ updating based on what just changed.
 When a task finishes **all** DB/BE/FE work for a module, three more things happen automatically:
 
 - Logger calls are inserted into the module's code (per `logging-spec.md`), and
-  `docs/flows/log-<module-name>.md` is created/updated
+  `docs/modules/[module]/log-[module].md` is created/updated
 - You're asked whether to add temporary debug instrumentation (per `debug-instrumentation-rules.md`)
 - The English PDF is regenerated (`docs/project-documentation-en.pdf`)
 
@@ -133,9 +136,9 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 | `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
 | `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md` |
 | `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
-| `activity_to_html.py` | any `.md` (activity block) | Activity flow | flow files |
-| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | flow files |
-| `class_to_html.py` | any `.md` (class block) | Class structure | `*-module-data-flow.md` |
+| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `modules/*/` flow files |
+| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | `modules/*/` flow files |
+| `class_to_html.py` | any `.md` (class block) | Class structure | `modules/*/*-module-data-flow.md` |
 | `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
 
 ```bash
@@ -144,9 +147,9 @@ python3 docs/script/architecture_to_html.py docs/architecture/architecture.md
 python3 docs/script/schema_to_html.py path/to/schema.prisma
 python3 docs/script/state_to_html.py docs/specs/data-model.md
 python3 docs/script/usecase_to_html.py docs/specs/permissions.md
-python3 docs/script/activity_to_html.py docs/flows/order-module-flow.md
-python3 docs/script/sequence_to_html.py docs/flows/order-module-flow.md
-python3 docs/script/class_to_html.py docs/flows/order-module-data-flow.md
+python3 docs/script/activity_to_html.py docs/modules/order/order-module-flow.md
+python3 docs/script/sequence_to_html.py docs/modules/order/order-module-flow.md
+python3 docs/script/class_to_html.py docs/modules/order/order-module-data-flow.md
 python3 docs/script/component_to_html.py docs/architecture/backend.md
 ```
 
@@ -194,5 +197,5 @@ To add a new document to the PDF, add it to `PDF_ALLOWLIST` in **both** `build_p
 - **Package First**: prefer an existing package, then an existing utility, then framework
   convention, and only write custom code for business logic, domain rules, data mapping, or
   system integration.
-- **Incremental updates only**: `codebase-map.md` and `module-data-flow.md` are updated one task
+- **Incremental updates only**: `codebase-map.md` and `modules/module-data-flow.md` are updated one task
   at a time — the agent never re-scans the whole repository to regenerate them.
