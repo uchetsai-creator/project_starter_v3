@@ -11,6 +11,8 @@
 
 * After implementation, update the matching module flow file with actual function names and file paths.
 * If no matching implementation flow exists, create one.
+* Each module flow file must include a class block describing the code structure.
+* After writing, run: python3 docs/script/class_to_html.py <module-flow-file>
 
 ### CRUD Rules
 
@@ -18,7 +20,7 @@
 * Create separate flows for:
 
   * Create
-  * Read/List
+  * Read / List
   * Read Detail (if applicable)
   * Update
   * Delete (if applicable)
@@ -38,15 +40,11 @@ File: path/to/file
 Step Name
 File: path/to/file
 ↓
-Step Name
-File: path/to/file
-↓
 ...
 ↓
 UI Update
 File: path/to/file
 ```
-Describe the actual execution order.
 
 Common step types:
 
@@ -67,11 +65,46 @@ Common step types:
 
 Only use the step types that exist for the feature.
 
+## Class Structure Format
+
+Each module flow file must also include a class block:
+
+```class
+title: [Module Name] Class Structure
+
+class [Controller] {
+  +[method](req, res): void
+  +[method](req, res): void
+}
+
+class [Service] {
+  +[method](input: [Type]): [ReturnType]
+  -[privateMethod](param): [Type]
+}
+
+class [Repository] {
+  +[method](id: string): [Type]
+  +[method](input: [Type]): [Type]
+}
+
+[Controller] --> [Service]: uses
+[Service] --> [Repository]: uses
+```
+
 ---
 
 ## Module Flow Files
 
-| Module | Files |
+File naming convention: `[module-name]-module-data-flow.md`
+
+Examples:
+- `order-module-data-flow.md`
+- `inventory-module-data-flow.md`
+- `payment-module-data-flow.md`
+
+Files matching this pattern are automatically included in the PDF.
+
+| Module | File |
 |---|---|
-| [e.g., Order Create] | `docs/flows/order-create-flow.md` |
-| [module] | [files] |
+| [e.g., Order] | `docs/flows/order-module-data-flow.md` |
+| [module] | `docs/flows/[module-name]-module-data-flow.md` |
