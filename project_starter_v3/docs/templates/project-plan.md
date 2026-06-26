@@ -1,138 +1,158 @@
 # Project Plan
 
 <!--
-  排序原則：
-  1. 共用基礎（Shared）先做
-  2. 每個功能垂直切片：DB → BE → FE
-  3. 每個 Task 半天到一天的工作量
+  Ordering principles:
+  1. Shared foundation first
+  2. Each feature as a vertical slice: DB → BE → FE
+  3. Each task should be roughly half a day to one day of work
 
-  Task 命名規則：[層級] [功能名稱]
-  層級前綴：DB / BE / FE / MOD / INF
+  Task naming convention: [Layer] [Feature Name]
+  Layer prefixes: DB / BE / FE / MOD / INF
+
+  Code quality tasks (added by code-quality-check.md) use the prefix [CODE QUALITY]
+  and are inserted at the end of the current sprint when found.
 -->
 
 ---
 
 ## Shared Foundation
 
-### Task 1: [共用基礎名稱]
+### Task 1: [Foundation Name]
 
-**Goal:** [說明這個 task 要達成什麼]
+**Goal:** [What this task achieves]
 
 **Files:**
-- Create: `[檔案路徑]`
-- Modify: `[檔案路徑]`
-- Read: `[檔案路徑]`
+- Create: `[file path]`
+- Modify: `[file path]`
+- Read: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [具體說明要做什麼。預期結果：[說明]]
+- [ ] **Step 1: [Step name]**
+  [What to do. Expected result: [description]]
 
-- [ ] **Step 2: [步驟名稱]**
-  [具體說明。預期結果：[說明]]
+- [ ] **Step 2: [Step name]**
+  [What to do. Expected result: [description]]
 
 - [ ] **Step 3: Verify**
-  [驗證指令，e.g., `curl -s http://localhost:4000/health`]
-  Expected: [預期輸出]
+  [Verification command, e.g., `curl -s http://localhost:4000/health`]
+  Expected: [expected output]
 
 ---
 
-## [A 功能名稱]
+## [Feature A]
 
-### Task 2: DB [A 功能] Schema
+### Task 2: DB [Feature A] Schema
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[migration 檔案路徑]`
+- Create: `[migration file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明。預期結果：[說明]]
+- [ ] **Step 1: [Step name]**
+  [Description. Expected result: [description]]
 
 - [ ] **Step 2: Verify**
-  [驗證方式]
-  Expected: [預期結果]
+  [Verification method]
+  Expected: [expected result]
 
 ---
 
-### Task 3: BE [A 功能]
+### Task 3: BE [Feature A]
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[檔案路徑]`
-- Modify: `[檔案路徑]`
+- Create: `[file path]`
+- Modify: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明。預期結果：[說明]]
+- [ ] **Step 1: [Step name]**
+  [Description. Expected result: [description]]
 
 - [ ] **Step 2: Verify**
-  [驗證指令]
-  Expected: [預期結果]
+  [Verification command]
+  Expected: [expected result]
 
 ---
 
-### Task 4: FE [A 功能]
+### Task 4: FE [Feature A]
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[檔案路徑]`
+- Create: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明]
+- [ ] **Step 1: [Step name]**
+  [Description]
 
 - [ ] **Step 2: Verify**
-  [驗證方式]
-  Expected: [預期結果]
+  [Verification method]
+  Expected: [expected result]
+
+<!--
+  [CODE QUALITY] tasks are inserted here, at the end of the current sprint,
+  when Medium or Low severity issues are found during code-quality-check.md.
+
+  Format:
+  ### Task N: [CODE QUALITY] [Area]: [Recommendation]
+  **Goal:** [What to fix and why]
+  **Files:**
+  - Modify: `[file path]`
+  - [ ] **Step 1: [Fix description]**
+  - [ ] **Step 2: Verify**
+    Expected: [no regressions, behaviour unchanged]
+
+  After completing [CODE QUALITY] tasks, review all remaining incomplete tasks below
+  and update any that reference changed function names, module interfaces, or file paths.
+-->
 
 ---
 
-## [B 功能名稱]
+## [Feature B]
 
-### Task 5: DB [B 功能] Schema
+### Task 5: DB [Feature B] Schema
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[檔案路徑]`
+- Create: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明]
+- [ ] **Step 1: [Step name]**
+  [Description]
 
 - [ ] **Step 2: Verify**
-  Expected: [預期結果]
+  Expected: [expected result]
 
 ---
 
-### Task 6: BE [B 功能]
+### Task 6: BE [Feature B]
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[檔案路徑]`
+- Create: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明]
+- [ ] **Step 1: [Step name]**
+  [Description]
 
 - [ ] **Step 2: Verify**
-  Expected: [預期結果]
+  Expected: [expected result]
 
 ---
 
-### Task 7: FE [B 功能]
+### Task 7: FE [Feature B]
 
-**Goal:** [說明]
+**Goal:** [Description]
 
 **Files:**
-- Create: `[檔案路徑]`
+- Create: `[file path]`
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明]
+- [ ] **Step 1: [Step name]**
+  [Description]
 
 - [ ] **Step 2: Verify**
-  Expected: [預期結果]
+  Expected: [expected result]
 
 ---
 
 ## Completed
 
-* [Task 名稱] — [完成日期]
+* [Task name] — [completion date]
