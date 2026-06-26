@@ -1,47 +1,48 @@
 # Permissions
 
 <!--
-  描述角色、權限定義、以及每個 API endpoint 的存取控制。
-  對應 api-contract.md 的每個 endpoint。
+  Describes roles, permission definitions, and access control for every API endpoint.
+  Corresponds to every endpoint in api-contract.md.
+  After writing, run: python3 docs/script/usecase_to_html.py docs/specs/permissions.md
 -->
 
-**存取控制模型:** RBAC
+**Access Control Model:** RBAC
 
 ---
 
-## 角色定義
+## Role Definitions
 
-| 角色 | 說明 | 繼承自 |
+| Role | Description | Inherits from |
 |---|---|---|
-| `ROLE_GUEST` | 未登入用戶，只能存取公開資源 | — |
-| `ROLE_USER` | 已登入用戶，只能操作自己的資源 | `ROLE_GUEST` |
-| `ROLE_ADMIN` | 可操作所有用戶的資源 | `ROLE_USER` |
-| `[ROLE_ID]` | [說明] | [繼承自] |
+| `ROLE_GUEST` | Unauthenticated user, public resources only | — |
+| `ROLE_USER` | Authenticated user, own resources only | `ROLE_GUEST` |
+| `ROLE_ADMIN` | Full access to all resources | `ROLE_USER` |
+| `[ROLE_ID]` | [Description] | [Inherits from] |
 
 ---
 
-## 權限定義
+## Permission Definitions
 
-| 權限 | 說明 |
+| Permission | Description |
 |---|---|
-| `[resource]:read` | 讀取 [資源] |
-| `[resource]:create` | 建立 [資源] |
-| `[resource]:update` | 更新自己的 [資源] |
-| `[resource]:update:any` | 更新任何人的 [資源] |
-| `[resource]:delete` | 刪除自己的 [資源] |
-| `[resource]:delete:any` | 刪除任何人的 [資源] |
+| `[resource]:read` | Read [resource] |
+| `[resource]:create` | Create [resource] |
+| `[resource]:update` | Update own [resource] |
+| `[resource]:update:any` | Update any [resource] |
+| `[resource]:delete` | Delete own [resource] |
+| `[resource]:delete:any` | Delete any [resource] |
 
 ---
 
-## 角色權限矩陣
+## RBAC Matrix
 
 <!--
-  ✅ 允許
-  ❌ 拒絕
-  🔶 條件允許（見下方說明）
+  ✅ Allowed
+  ❌ Denied
+  🔶 Conditionally allowed (see notes below)
 -->
 
-| 權限 | ROLE_GUEST | ROLE_USER | ROLE_ADMIN |
+| Permission | ROLE_GUEST | ROLE_USER | ROLE_ADMIN |
 |---|---|---|---|
 | `[resource]:read` | ✅ | ✅ | ✅ |
 | `[resource]:create` | ❌ | ✅ | ✅ |
@@ -50,39 +51,66 @@
 | `[resource]:delete` | ❌ | 🔶 | ✅ |
 | `[resource]:delete:any` | ❌ | ❌ | ✅ |
 
-**🔶 條件說明:**
-* `[resource]:update` — `ROLE_USER` 只能更新 `owner_id = current_user.id` 的資源
-* `[resource]:delete` — `ROLE_USER` 只能刪除 `owner_id = current_user.id` 的資源
+**🔶 Conditions:**
+* `[resource]:update` — `ROLE_USER` may only update resources where `owner_id = current_user.id`
+* `[resource]:delete` — `ROLE_USER` may only delete resources where `owner_id = current_user.id`
 
 ---
 
-## API Endpoint 權限對應
+## API Endpoint Access
 
-| Method | Path | 所需權限 | 最低角色 | 額外條件 |
+| Method | Path | Required permission | Minimum role | Extra condition |
 |---|---|---|---|---|
 | `POST` | `/[resource]` | `[resource]:create` | `ROLE_USER` | — |
 | `GET` | `/[resource]` | `[resource]:read` | `ROLE_GUEST` | — |
 | `GET` | `/[resource]/:id` | `[resource]:read` | `ROLE_GUEST` | — |
-| `PATCH` | `/[resource]/:id` | `[resource]:update` | `ROLE_USER` | 僅限 `owner_id = current_user.id` |
-| `DELETE` | `/[resource]/:id` | `[resource]:delete` | `ROLE_USER` | 僅限 `owner_id = current_user.id` |
+| `PATCH` | `/[resource]/:id` | `[resource]:update` | `ROLE_USER` | Own resource only |
+| `DELETE` | `/[resource]/:id` | `[resource]:delete` | `ROLE_USER` | Own resource only |
 
 ---
 
-## 權限執行層
+## Enforcement Layers
 
-| 層級 | 負責什麼 |
+| Layer | Responsibility |
 |---|---|
-| API Gateway | JWT 驗證、角色解析 |
-| Middleware | 角色權限檢查，拒絕無權限請求（403） |
-| Service Layer | 所有權檢查，確認 `owner_id = current_user.id` |
+| API Gateway | JWT validation, role extraction |
+| Middleware | Role-permission check, reject unauthorized (403) |
+| Service Layer | Ownership check — `owner_id = current_user.id` |
 
 ---
 
-## 對應 Edge Cases
+## Edge Cases
 
-| Edge Case | 對應設計 | 回應 |
+| Edge Case | Design | Response |
 |---|---|---|
-| 未認證用戶存取受保護資源 | API Gateway JWT 驗證失敗 | `401 AUTH_TOKEN_MISSING` |
-| 低權限角色執行高權限操作 | Middleware 角色檢查 | `403 AUTH_PERMISSION_DENIED` |
-| 用戶存取不屬於自己的資源 | Service Layer 所有權檢查 | `403 AUTH_RESOURCE_NOT_OWNED` |
-| Token 已過期 | API Gateway JWT 驗證失敗 | `401 AUTH_TOKEN_EXPIRED` |
+| Unauthenticated access to protected resource | API Gateway JWT check fails | `401 AUTH_TOKEN_MISSING` |
+| Low-privilege role attempts high-privilege action | Middleware role check | `403 AUTH_PERMISSION_DENIED` |
+| User accesses another user's resource | Service Layer ownership check | `403 AUTH_RESOURCE_NOT_OWNED` |
+| Expired token | API Gateway JWT check fails | `401 AUTH_TOKEN_EXPIRED` |
+
+---
+
+## Use Case Diagram
+
+```usecase
+title: [Resource] Access Control
+
+actor Guest
+actor User
+actor Admin
+
+usecase "[resource] Read" as UC1
+usecase "[resource] Create" as UC2
+usecase "[resource] Update Own" as UC3
+usecase "[resource] Delete Own" as UC4
+usecase "[resource] Update Any" as UC5
+usecase "[resource] Delete Any" as UC6
+
+Guest --> UC1
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+Admin --> UC5
+Admin --> UC6
+```
