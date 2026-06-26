@@ -55,6 +55,12 @@ project_starter_v2_note-main/        ← this repo (template only)
     └── script/
         ├── architecture_to_html.py  ← architecture.md → interactive HTML + static SVG
         ├── schema_to_html.py        ← Prisma/SQL schema → ERD (interactive HTML + static SVG)
+        ├── sequence_to_html.py      ← sequence diagram block → interactive HTML + static SVG
+        ├── state_to_html.py         ← state diagram block → interactive HTML + static SVG
+        ├── class_to_html.py         ← class diagram block → interactive HTML + static SVG
+        ├── usecase_to_html.py       ← use case diagram block → interactive HTML + static SVG
+        ├── activity_to_html.py      ← activity diagram block → interactive HTML + static SVG
+        ├── component_to_html.py     ← component diagram block → interactive HTML + static SVG
         ├── translate_docs.py        ← translate docs/ to Traditional Chinese → docs-zh/
         └── build_pdf.py             ← merges all of docs/ into one PDF, with diagrams embedded
 ```
@@ -83,7 +89,8 @@ new_project/
     ├── architecture/
     ├── business/
     ├── flows/
-    │   └── log-<module-name>.md     ← generated when each module is implemented
+    │   ├── [module]-module-data-flow.md  ← created per module during development
+    │   └── log-<module-name>.md          ← created when each module completes
     └── script/
 ```
 
@@ -110,24 +117,38 @@ When a task finishes **all** DB/BE/FE work for a module, three more things happe
 - Logger calls are inserted into the module's code (per `logging-spec.md`), and
   `docs/flows/log-<module-name>.md` is created/updated
 - You're asked whether to add temporary debug instrumentation (per `debug-instrumentation-rules.md`)
-- The merged documentation PDF is regenerated (`docs/project-documentation.pdf`)
+- The English PDF is regenerated (`docs/project-documentation-en.pdf`)
 
 ---
 
 ## Diagrams
 
-Two scripts turn structured Markdown into diagrams — each one outputs both an **interactive HTML**
-(drag, zoom, click connections) and a **static SVG** (for screenshots / PDF embedding):
+Eight scripts turn structured Markdown blocks into diagrams — each outputs both an **interactive HTML**
+(drag, zoom, click) and a **static SVG** (for PDF embedding). All six UML scripts automatically
+append a type suffix to the output filename to avoid collisions (e.g. `data-model-state.html`).
+
+| Script | Input | Diagram type | Where it's embedded |
+|---|---|---|---|
+| `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md` |
+| `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
+| `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md` |
+| `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
+| `activity_to_html.py` | any `.md` (activity block) | Activity flow | flow files |
+| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | flow files |
+| `class_to_html.py` | any `.md` (class block) | Class structure | `*-module-data-flow.md` |
+| `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
 
 ```bash
-# System architecture — reads the YAML block inside architecture.md
+# Examples
 python3 docs/script/architecture_to_html.py docs/architecture/architecture.md
-
-# Database ERD — reads a Prisma schema or SQL DDL file
 python3 docs/script/schema_to_html.py path/to/schema.prisma
+python3 docs/script/state_to_html.py docs/specs/data-model.md
+python3 docs/script/usecase_to_html.py docs/specs/permissions.md
+python3 docs/script/activity_to_html.py docs/flows/order-module-flow.md
+python3 docs/script/sequence_to_html.py docs/flows/order-module-flow.md
+python3 docs/script/class_to_html.py docs/flows/order-module-data-flow.md
+python3 docs/script/component_to_html.py docs/architecture/backend.md
 ```
-
-Both produce `<name>.html` and `<name>.svg` side by side.
 
 ---
 
