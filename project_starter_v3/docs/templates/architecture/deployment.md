@@ -88,3 +88,25 @@ Expected state when running:
 | Local | `http://localhost:[port]` | Docker Compose |
 | Staging | `[URL]` | [hosting platform] |
 | Production | `[URL]` | [hosting platform] |
+
+---
+
+## Verification
+
+How to confirm the system is running correctly after startup.
+
+- [ ] **[Feature name] — [What to verify]**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+
+- [ ] **[Feature name] — [What to verify]**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+
+---
+
+## Teardown
+
+```bash
+[command to stop all services]
+```
