@@ -33,7 +33,6 @@ except ImportError:
 PDF_ALLOWLIST = [
     ("requirements",   "project-requirements.md"),
     ("specifications", "specs/research.md"),
-    ("specifications", "specs/quickstart.md"),
     ("specifications", "specs/data-model.md"),
     ("specifications", "specs/api-contract.md"),
     ("specifications", "specs/permissions.md"),
