@@ -2,9 +2,9 @@
 
 ## Current Task
 
-**Task:** [Task 名稱，e.g., BE Order API]
+**Task:** [Task name, e.g., BE Order API]
 
-**Goal:** [說明這個 task 要達成什麼]
+**Goal:** [What this task needs to achieve]
 
 **Status:** In Progress
 
@@ -12,28 +12,34 @@
 
 ## Required Context
 
-* `project-requirements.md`
-* `docs/[相關 flow 文件]`
-* `[其他需要的檔案路徑]`
+<!--
+  Only include documents actually needed for this task.
+  Do not include project-requirements.md, project-plan.md, or changelog.md
+  unless this task explicitly requires them.
+-->
+
+* `docs/[relevant file]`
+* `[other required file paths]`
 
 ---
 
 ## Steps
 
-- [ ] **Step 1: [步驟名稱]**
-  [說明]
-  Expected: [預期結果]
+- [ ] **Step 1: [Step name]**
+  [Description]
+  Expected: [expected result]
 
-- [ ] **Step 2: [步驟名稱]**
-  [說明]
-  Expected: [預期結果]
+- [ ] **Step 2: [Step name]**
+  [Description]
+  Expected: [expected result]
 
-- [ ] **Step 3: Verify**
-  [驗證指令]
-  Expected: [預期結果]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output or behaviour]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
 ## Notes
 
-* [實作過程中的補充說明、決策依據、遇到的問題]
+* [Implementation decisions, rationale, or issues encountered]
