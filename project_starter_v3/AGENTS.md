@@ -25,10 +25,16 @@ The goal is to describe what already exists — not to redesign it. Read the cod
 Do not scan the entire repository at once. Work module by module.
 
 Step 1 — Understand the system (read before writing anything):
-1. Read the entry point (main file, router, app bootstrap) to understand the overall structure.
-2. Identify the main modules/features from the router or directory structure.
-3. Read the schema file (Prisma, SQL, ORM models) to understand the data model.
-4. Read one complete module (controller → service → repository) to understand the layering pattern.
+1. Read the entry point to understand the overall structure
+   (e.g. main file, router, app bootstrap, CLI entry, index)
+2. Identify the main modules/features from the directory structure or routing layer
+   (e.g. router, controller folder, Django urlpatterns, Go handler registration)
+3. Read the data layer to understand the data model
+   (e.g. Prisma schema, SQL DDL, ORM models, migration files)
+4. Read one complete vertical slice to understand the layering pattern
+   (e.g. controller → service → repository, view → serializer → model, handler → usecase → store)
+
+Do not scan the entire codebase. Read only enough to understand the structure and one representative module.
 
 Step 1b — Code Quality Check:
 Read and follow code-quality-check.md. Do not proceed to Step 2 until the check is complete and acknowledged by the user.
