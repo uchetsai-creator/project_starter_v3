@@ -79,7 +79,6 @@ PDF_ALLOWLIST = [
     ("specifications", "specs/permissions.md"),
     ("specifications", "specs/logging-spec.md"),
     ("specifications", "specs/research.md"),
-    ("specifications", "specs/quickstart.md"),
     # 5. Flows — how it runs (individual *-module-data-flow.md added automatically)
     ("flows",          "modules/module-data-flow.md"),
     # 6. Project Status
