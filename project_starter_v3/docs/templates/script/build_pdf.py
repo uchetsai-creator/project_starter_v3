@@ -81,7 +81,7 @@ PDF_ALLOWLIST = [
     ("specifications", "specs/research.md"),
     ("specifications", "specs/quickstart.md"),
     # 5. Flows — how it runs (individual *-module-data-flow.md added automatically)
-    ("flows",          "flows/module-data-flow.md"),
+    ("flows",          "modules/module-data-flow.md"),
     # 6. Project Status
     ("project",        "codebase-map.md"),
 ]
@@ -185,7 +185,7 @@ def find_allowed_files(docs_dir, strings):
             print(f"Warning: allowlisted file not found, skipping: {rel}")
 
     flows_label = strings["sections"]["flows"]
-    for path in sorted(glob.glob(os.path.join(docs_dir, "flows", "*-module-data-flow.md"))):
+    for path in sorted(glob.glob(os.path.join(docs_dir, "modules", "*", "*-module-data-flow.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
             # Insert before codebase-map (last entry) so flow files sit under Flows
