@@ -10,8 +10,11 @@ If starting a new project:
 5. Create docs/specs/data-model.md from templates/specs/data-model.md.
 6. Create docs/specs/api-contract.md from templates/specs/api-contract.md.
 7. Create docs/specs/permissions.md from templates/specs/permissions.md.
-8. Create docs/project-plan.md from templates/project-plan.md.
-9. Create docs/current-state.md from templates/current-state.md.
+8. Create docs/business/business-process.md from templates/business/business-process.md.
+9. Create docs/business/business-objects.md from templates/business/business-objects.md.
+10. Create docs/business/business-rules.md from templates/business/business-rules.md.
+11. Create docs/project-plan.md from templates/project-plan.md.
+12. Create docs/current-state.md from templates/current-state.md.
 
 ---
 
@@ -99,7 +102,7 @@ Run this check after every task — most of the time the answer will be "no," bu
   * If yes: this module is now complete. Do all of the following:
     1. Insert logger calls into the module's code, following the rules defined in docs/specs/logging-spec.md (required log points, message format, logger instantiation). Direct print/console statements are not allowed.
        logging-spec.md itself is the rule definition — do not add module-specific content to it.
-       Create or update docs/flows/log-<module-name>.md (one file per module) to list every log point added, in call order.
+       Create or update docs/flows/log-<module-name>.md to list every log point added, in call order.
     2. Ask: "Would you like to add debug instrumentation to this module? (follows debug-instrumentation-rules.md)"
        * If yes: follow debug-instrumentation-rules.md and instrument the module.
        * If no: continue.
