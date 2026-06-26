@@ -18,7 +18,7 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
    following the checklist in `AGENTS.md`.
 
 ```
-project_starter_v2_note-main/        ← this repo (template only)
+project_starter_v3                   ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
 └── templates/
