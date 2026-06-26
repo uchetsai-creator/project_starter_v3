@@ -111,6 +111,10 @@ User --> UC1
 User --> UC2
 User --> UC3
 User --> UC4
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
 Admin --> UC5
 Admin --> UC6
 ```
