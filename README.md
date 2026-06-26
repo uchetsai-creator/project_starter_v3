@@ -55,6 +55,7 @@ project_starter_v2_note-main/        ← this repo (template only)
     └── script/
         ├── architecture_to_html.py  ← architecture.md → interactive HTML + static SVG
         ├── schema_to_html.py        ← Prisma/SQL schema → ERD (interactive HTML + static SVG)
+        ├── translate_docs.py        ← translate docs/ to Traditional Chinese → docs-zh/
         └── build_pdf.py             ← merges all of docs/ into one PDF, with diagrams embedded
 ```
 
@@ -132,17 +133,31 @@ Both produce `<name>.html` and `<name>.svg` side by side.
 
 ## Generating the merged PDF
 
-Combines every real document under `docs/` (excluding `templates/` and `script/`) into a single
-PDF — table of contents, page numbers, and any architecture/ERD diagrams embedded as images with
-a clickable link to the original interactive HTML.
+Combines every real document under `docs/` (per the explicit allowlist in `build_pdf.py`) into a
+single PDF — table of contents, page numbers, and architecture/ERD diagrams embedded as images
+with a clickable link to the original interactive HTML.
 
 ```bash
 pip install markdown weasyprint cairosvg --break-system-packages
-python3 docs/script/build_pdf.py docs -o docs/project-documentation.pdf
+
+# English PDF (runs automatically when a module completes)
+python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf
+
+# Chinese PDF (manual, only when needed)
+python3 docs/script/translate_docs.py docs --out docs-zh
+python3 docs/script/build_pdf.py docs-zh --lang zh -o docs/project-documentation-zh.pdf
 ```
 
-This runs automatically whenever a module completes (see above) — you don't need to ask for it,
-but you can also run it manually any time.
+`translate_docs.py` translates every allowlisted markdown file to Traditional Chinese using
+Google Translate (free, no API key needed), preserving code blocks, inline code, HTML comments,
+and table structure. It mirrors the translated files into `docs-zh/`, which `build_pdf.py` then
+reads exactly like `docs/`.
+
+> Translation quality is good for headings and short sentences. Technical jargon and proper nouns
+> may need manual review after translation.
+
+To add a new document to the PDF, add it to `PDF_ALLOWLIST` in **both** `build_pdf.py` and
+`translate_docs.py` — they each maintain their own copy of the list.
 
 ---
 
