@@ -15,12 +15,6 @@ Update when:
 * NEEDS CLARIFICATION items are resolved
 * Architecture decisions change
 
-### quickstart.md
-Update when:
-* Setup steps change
-* New verification steps are added
-* Environment requirements change
-
 ### data-model.md
 Update when:
 * Schema changes
