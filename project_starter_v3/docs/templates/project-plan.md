@@ -7,6 +7,14 @@
   3. Each task should be roughly half a day to one day of work
   4. Group tasks into sprints — a sprint is a logical chunk of work, typically 3-5 tasks
 
+  Task size rules:
+  - A task should have no more than 5 steps (excluding Verify).
+  - If a task has more than 5 steps, split it into two tasks.
+  - A task should touch no more than 3-4 files. If more, split it.
+  - A task should be completable and verifiable on its own — if it cannot be verified
+    without finishing another task first, merge them or reorder.
+  - DB / BE / FE are always separate tasks. Never combine layers in one task.
+
   Task naming convention: [Layer] [Feature Name]
   Layer prefixes: DB / BE / FE / MOD / INF
 
@@ -19,6 +27,9 @@
 ---
 
 ## Sprint 1: Shared Foundation
+
+Tasks in this sprint:
+- Task 1: INF [Foundation Name]
 
 ### Task 1: INF [Foundation Name]
 
@@ -44,6 +55,11 @@
 ---
 
 ## Sprint 2: [Feature A]
+
+Tasks in this sprint:
+- Task 2: DB [Feature A] Schema
+- Task 3: BE [Feature A]
+- Task 4: FE [Feature A]
 
 ### Task 2: DB [Feature A] Schema
 
@@ -121,6 +137,11 @@
 ---
 
 ## Sprint 3: [Feature B]
+
+Tasks in this sprint:
+- Task 5: DB [Feature B] Schema
+- Task 6: BE [Feature B]
+- Task 7: FE [Feature B]
 
 ### Task 5: DB [Feature B] Schema
 
