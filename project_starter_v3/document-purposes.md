@@ -58,7 +58,7 @@ Update when:
 * Log format changes
 
 This file is the rule definition only — do not add module-specific logging content here.
-Module-specific log points live in docs/flows/log-<module-name>.md.
+Module-specific log points live in docs/modules/<module-name>/log-<module-name>.md.
 
 ---
 
