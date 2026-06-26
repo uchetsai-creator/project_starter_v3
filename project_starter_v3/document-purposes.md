@@ -118,12 +118,12 @@ Update when:
 
 ---
 
-## Flows (docs/flows/)
+## Flows (docs/modules/)
 
 ### module-data-flow.md
 Purpose:
-Index and rule definition for module-level code flows. Each module gets its own flow file
-(`[module]-module-data-flow.md`) following the CRUD rules and implementation format defined here.
+Index and rule definition for module-level code flows. Sits at `docs/modules/module-data-flow.md`.
+Each module gets its own subfolder (`docs/modules/[module]/`) with its own flow file.
 
 Update when:
 * A new module is created — add a row to the Module Flow Files table
@@ -133,10 +133,10 @@ Purpose:
 Track code-level execution flow (function names, file paths) for a specific module.
 Also includes a class block describing the module's class/service structure.
 
-Naming convention: `[module-name]-module-data-flow.md`
-Examples: `order-module-data-flow.md`, `payment-module-data-flow.md`
+Location: `docs/modules/[module]/[module]-module-data-flow.md`
+Examples: `docs/modules/order/order-module-data-flow.md`
 
-Files matching `*-module-data-flow.md` are automatically included in the PDF.
+Files matching this pattern are automatically included in the PDF.
 
 Update when:
 * Function names or file paths change for this module
@@ -144,13 +144,14 @@ Update when:
 * The module's class structure changes
 
 After updating, regenerate class diagram:
-`python3 docs/script/class_to_html.py docs/flows/<module>-module-data-flow.md`
+`python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
 
 ### module-flow.md
 Purpose:
 Describe detailed execution steps for a business process, when business-process.md is not
-granular enough. Includes both an activity block (execution steps) and a sequence block
-(cross-service calls).
+granular enough. Sits at `docs/modules/module-flow.md` (shared) or create a dedicated
+`docs/modules/[module]/[module]-flow.md` for a specific module's flow.
+Includes both an activity block (execution steps) and a sequence block (cross-service calls).
 
 Update when:
 * A business process requiring operational detail is added or changes
@@ -165,6 +166,7 @@ Purpose:
 Track every log point in a module, in call order. One file per module.
 Not included in the PDF — this is an implementation detail reference for developers.
 
+Location: `docs/modules/[module]/log-[module].md`
 Generate when the module is complete (see AGENTS.md → Module Completion Check).
 Update immediately if function names or file paths change.
 
@@ -228,7 +230,7 @@ Do not scan the entire repository to regenerate this file. Update incrementally,
 | `schema_to_html.py` | Prisma / SQL file | `.html` / `.svg` | `specs/data-model.md` |
 | `state_to_html.py` | state block in any .md | `-state.html` / `.svg` | `specs/data-model.md` |
 | `usecase_to_html.py` | usecase block in any .md | `-usecase.html` / `.svg` | `specs/permissions.md` |
-| `activity_to_html.py` | activity block in any .md | `-activity.html` / `.svg` | flow files |
-| `sequence_to_html.py` | sequence block in any .md | `-sequence.html` / `.svg` | flow files |
-| `class_to_html.py` | class block in any .md | `-class.html` / `.svg` | `*-module-data-flow.md` |
+| `activity_to_html.py` | activity block in any .md | `-activity.html` / `.svg` | `modules/*/` flow files |
+| `sequence_to_html.py` | sequence block in any .md | `-sequence.html` / `.svg` | `modules/*/` flow files |
+| `class_to_html.py` | class block in any .md | `-class.html` / `.svg` | `modules/*/*-module-data-flow.md` |
 | `component_to_html.py` | component block in any .md | `-component.html` / `.svg` | `backend.md` / `frontend.md` |
