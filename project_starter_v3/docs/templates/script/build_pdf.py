@@ -221,11 +221,13 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
         # Resolve target: fixed mapping first, then dynamic module-data-flow-class pattern
         target = DIAGRAM_TARGETS.get(key)
         if target is None:
-            # Dynamic: order-module-data-flow-class → flows/order-module-data-flow.md
+            # Dynamic: order-module-data-flow-class → modules/order/order-module-data-flow.md
             m = re.match(r'^(.+)-class$', key)
             if m:
                 base = m.group(1)  # e.g. order-module-data-flow
-                target = f"flows/{base}.md"
+                # Extract module name: order-module-data-flow -> order
+                module_name = base.replace('-module-data-flow', '')
+                target = f"modules/{module_name}/{base}.md"
 
         if target != rel:
             continue
