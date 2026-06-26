@@ -5,26 +5,30 @@
   1. Shared foundation first
   2. Each feature as a vertical slice: DB → BE → FE
   3. Each task should be roughly half a day to one day of work
+  4. Group tasks into sprints — a sprint is a logical chunk of work, typically 3-5 tasks
 
   Task naming convention: [Layer] [Feature Name]
   Layer prefixes: DB / BE / FE / MOD / INF
 
   Code quality tasks (added by code-quality-check.md) use the prefix [CODE QUALITY]
   and are inserted at the end of the current sprint when found.
+  After completing [CODE QUALITY] tasks, review all remaining tasks and update any
+  that reference changed function names, module interfaces, or file paths.
 -->
 
 ---
 
-## Shared Foundation
+## Sprint 1: Shared Foundation
 
-### Task 1: [Foundation Name]
+### Task 1: INF [Foundation Name]
 
 **Goal:** [What this task achieves]
+
+**Context:** `[file path]` — [why it needs to be read before starting]
 
 **Files:**
 - Create: `[file path]`
 - Modify: `[file path]`
-- Read: `[file path]`
 
 - [ ] **Step 1: [Step name]**
   [What to do. Expected result: [description]]
@@ -32,17 +36,20 @@
 - [ ] **Step 2: [Step name]**
   [What to do. Expected result: [description]]
 
-- [ ] **Step 3: Verify**
-  [Verification command, e.g., `curl -s http://localhost:4000/health`]
-  Expected: [expected output]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output or behaviour]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
-## [Feature A]
+## Sprint 2: [Feature A]
 
 ### Task 2: DB [Feature A] Schema
 
 **Goal:** [Description]
+
+**Context:** `[schema file]` — [why]
 
 **Files:**
 - Create: `[migration file path]`
@@ -50,15 +57,18 @@
 - [ ] **Step 1: [Step name]**
   [Description. Expected result: [description]]
 
-- [ ] **Step 2: Verify**
-  [Verification method]
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
 ### Task 3: BE [Feature A]
 
 **Goal:** [Description]
+
+**Context:** `[file path]` — [why]
 
 **Files:**
 - Create: `[file path]`
@@ -67,9 +77,10 @@
 - [ ] **Step 1: [Step name]**
   [Description. Expected result: [description]]
 
-- [ ] **Step 2: Verify**
-  [Verification command]
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
@@ -77,19 +88,23 @@
 
 **Goal:** [Description]
 
+**Context:** `[file path]` — [why]
+
 **Files:**
 - Create: `[file path]`
 
 - [ ] **Step 1: [Step name]**
   [Description]
 
-- [ ] **Step 2: Verify**
-  [Verification method]
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command or manual step]`
+  Expected: `[exact output or behaviour]`
+  Do not mark this task complete until the expected output is confirmed.
 
 <!--
-  [CODE QUALITY] tasks are inserted here, at the end of the current sprint,
-  when Medium or Low severity issues are found during code-quality-check.md.
+  Insert [CODE QUALITY] tasks here if Medium/Low issues were found during code-quality-check.md.
+  Complete these before starting Sprint 3.
+  After completing, review Sprint 3+ tasks and update any affected function names or file paths.
 
   Format:
   ### Task N: [CODE QUALITY] [Area]: [Recommendation]
@@ -97,20 +112,21 @@
   **Files:**
   - Modify: `[file path]`
   - [ ] **Step 1: [Fix description]**
-  - [ ] **Step 2: Verify**
-    Expected: [no regressions, behaviour unchanged]
-
-  After completing [CODE QUALITY] tasks, review all remaining incomplete tasks below
-  and update any that reference changed function names, module interfaces, or file paths.
+  - [ ] **Verify**
+    Run: `[exact command]`
+    Expected: `[no regressions, behaviour unchanged]`
+    Do not mark this task complete until the expected output is confirmed.
 -->
 
 ---
 
-## [Feature B]
+## Sprint 3: [Feature B]
 
 ### Task 5: DB [Feature B] Schema
 
 **Goal:** [Description]
+
+**Context:** `[file path]` — [why]
 
 **Files:**
 - Create: `[file path]`
@@ -118,8 +134,10 @@
 - [ ] **Step 1: [Step name]**
   [Description]
 
-- [ ] **Step 2: Verify**
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
@@ -127,14 +145,18 @@
 
 **Goal:** [Description]
 
+**Context:** `[file path]` — [why]
+
 **Files:**
 - Create: `[file path]`
 
 - [ ] **Step 1: [Step name]**
   [Description]
 
-- [ ] **Step 2: Verify**
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command]`
+  Expected: `[exact output]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
@@ -142,14 +164,18 @@
 
 **Goal:** [Description]
 
+**Context:** `[file path]` — [why]
+
 **Files:**
 - Create: `[file path]`
 
 - [ ] **Step 1: [Step name]**
   [Description]
 
-- [ ] **Step 2: Verify**
-  Expected: [expected result]
+- [ ] **Verify**
+  Run: `[exact command or manual step]`
+  Expected: `[exact output or behaviour]`
+  Do not mark this task complete until the expected output is confirmed.
 
 ---
 
