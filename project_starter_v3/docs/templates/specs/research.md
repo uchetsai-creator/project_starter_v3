@@ -1,44 +1,45 @@
 # Research
 
 <!--
-  在 project-plan.md 有 NEEDS CLARIFICATION 的技術選型時填寫。
-  每個決策記錄選擇、理由、評估過的替代方案。
+  Fill in when a technology decision needs to be made or a NEEDS CLARIFICATION
+  item from project-plan.md needs to be resolved.
+  Record the decision, rationale, and alternatives considered.
 -->
 
 ---
 
-## [技術決策名稱，e.g., 訊息佇列選型]
+## [Decision Name, e.g., Message Queue]
 
-**決策:** [最終選擇，e.g., AWS SQS]
+**Decision:** [Final choice, e.g., AWS SQS]
 
-**理由:**
-* [原因 1]
-* [原因 2]
+**Rationale:**
+* [Reason 1]
+* [Reason 2]
 
-**評估過的替代方案:**
+**Alternatives Considered:**
 
-| 方案 | 優點 | 缺點 | 排除原因 |
+| Option | Pros | Cons | Reason rejected |
 |---|---|---|---|
-| [方案 A] | [優點] | [缺點] | [為何不選] |
-| [方案 B] | [優點] | [缺點] | [為何不選] |
+| [Option A] | [pros] | [cons] | [why not chosen] |
+| [Option B] | [pros] | [cons] | [why not chosen] |
 
-**參考資料:**
-* [連結或說明]
+**References:**
+* [Link or description]
 
 ---
 
-## [技術決策名稱]
+## [Decision Name]
 
-**決策:** [最終選擇]
+**Decision:** [Final choice]
 
-**理由:**
-* [原因]
+**Rationale:**
+* [Reason]
 
-**評估過的替代方案:**
+**Alternatives Considered:**
 
-| 方案 | 優點 | 缺點 | 排除原因 |
+| Option | Pros | Cons | Reason rejected |
 |---|---|---|---|
-| [方案 A] | [優點] | [缺點] | [為何不選] |
+| [Option A] | [pros] | [cons] | [why not chosen] |
 
-**參考資料:**
-* [連結或說明]
+**References:**
+* [Link or description]
