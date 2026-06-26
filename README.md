@@ -18,10 +18,11 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
    following the checklist in `AGENTS.md`.
 
 ```
-project_starter_v3/                  ← this repo (template only)
+project_starter_v2_note-main/        ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
 ├── code-quality-check.md            ← code review checklist for retrofitting existing projects
+├── document-purposes.md             ← reference for what each document is for and when it changes
 └── templates/
     ├── project-requirements.md      ← project scope, goals, edge cases, acceptance criteria
     ├── project-plan.md              ← sprint/task breakdown (DB → BE → FE per feature)
