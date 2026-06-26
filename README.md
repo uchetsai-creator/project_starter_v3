@@ -31,7 +31,6 @@ project_starter_v3/                  ← this repo (template only)
     │
     ├── specs/
     │   ├── research.md              ← technology decisions + alternatives considered
-    │   ├── quickstart.md            ← how to run and verify the project end-to-end
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
     │   ├── api-contract.md          ← endpoints, validation rules, error codes
     │   ├── permissions.md           ← roles, RBAC matrix, endpoint access control
@@ -42,7 +41,7 @@ project_starter_v3/                  ← this repo (template only)
     │   ├── backend.md               ← backend stack, layering, module pattern
     │   ├── frontend.md              ← frontend stack, page structure, component strategy
     │   ├── database.md              ← entities/relationships (conceptual level)
-    │   └── deployment.md            ← services, env vars, startup/build/deploy flow
+    │   └── deployment.md            ← services, env vars, startup flow, verification steps
     │
     ├── business/
     │   ├── business-process.md      ← high-level workflows, decision points, exceptions
