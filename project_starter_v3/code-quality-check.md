@@ -47,19 +47,23 @@ Fix them one by one before proceeding to Step 2. Follow AGENTS.md principles:
 Package First, no unrelated refactor, incremental changes only.
 After fixing, note what was changed in a brief summary (one line per fix).
 
-**Medium and Low severity issues — add to project-plan:**
-For each Medium/Low finding, add a task to docs/project-plan.md under a
-`## Code Quality` sprint/section. Use this format:
+**Medium and Low severity issues — fix at end of current sprint:**
+Add each finding as a task at the end of the current sprint in docs/project-plan.md.
+Use this format:
 
 ```
-- [ ] [Area]: [Finding] — [Recommendation]
+- [ ] [CODE QUALITY] [Area]: [Recommendation]
 ```
 
 Example:
 ```
-- [ ] Schema: Add index on orders.status — frequently queried without index
-- [ ] Naming: Standardise repository method names across modules
+- [ ] [CODE QUALITY] Schema: Add index on orders.status — frequently queried without index
+- [ ] [CODE QUALITY] Naming: Standardise repository method names across modules
 ```
 
-Do not mention these issues again after adding them to the plan.
-They will be handled as normal tasks during development.
+When the current sprint ends and these tasks are completed:
+1. Review all remaining incomplete tasks in docs/project-plan.md.
+2. Check whether the changes made affect any upcoming tasks — for example, if a function was
+   renamed, or a module's interface changed, any task that references that function or module
+   may need to be updated.
+3. Update affected tasks before marking the sprint as done and moving to the next one.
