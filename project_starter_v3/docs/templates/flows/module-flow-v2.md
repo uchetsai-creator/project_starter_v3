@@ -1,18 +1,10 @@
-### module-flow.md
+# module-flow.md
 
 Purpose:
 
 Describe detailed execution steps for a business process.
 
 Create a dedicated flow document when a business process requires operational detail.
-
-Format:
-
-Step A
-↓
-Step B
-↓
-Step C
 
 Rules:
 
@@ -21,25 +13,53 @@ Rules:
 - Include system actions when relevant
 - Keep chronological order
 - One flow document per business process
+- Include all three formats below: text (quick read), activity block (execution steps), sequence block (cross-service calls)
+- After writing, run:
+  - python3 docs/script/activity_to_html.py <this-file>
+  - python3 docs/script/sequence_to_html.py <this-file>
 
 ---
 
-Example:
+## Process: [Flow Name]
 
-Process: Order Approval
+### Text Overview
 
 ```
-Order Submitted
+[Step A]
 ↓
-Manager Review
+[Step B]
 ↓
-Amount > 50,000?
-├─ Yes → Director Approval
-└─ No  → Manager Approval
+[Decision Point]?
+├─ Yes → [Step C]
+└─ No  → [Step D]
 ↓
-Order Confirmed
-↓
-Inventory Reserved
-↓
-Customer Notified
+[Step E]
+```
+
+### Activity Diagram
+
+```activity
+title: [Flow Name]
+
+start
+:[Step A];
+:[Step B];
+if ([Decision Point]?) then (yes)
+  :[Step C];
+else (no)
+  :[Step D];
+endif
+:[Step E];
+stop
+```
+
+### Sequence Diagram
+
+```sequence
+title: [Flow Name]
+
+[Service A] -> [Service B]: [message / action]
+[Service B] -> [Service C]: [message / action]
+[Service C] --> [Service B]: [response]
+[Service B] --> [Service A]: [response]
 ```
