@@ -10,11 +10,11 @@
 
 ### Implementation Rules
 
-- When implementing any module, automatically generate the matching `log-<module-name>.md` file.
-- The log file must be generated before or alongside the implementation, not after.
 - The log file must list every log point in the module in the order they are called.
 - After implementation, if function names or file paths change, update the matching log file immediately.
 - File paths must be relative to the project root.
+
+When to generate the log file and which step triggers it is defined in AGENTS.md → Module Completion Check.
 
 ---
 
@@ -63,19 +63,19 @@ The shared logger utility is responsible for handling file writes — individual
 Example:
 
 ```
-[2026-06-12T10:23:01.123Z] [INFO]  [ORDER]     建立訂單 — start
+[2026-06-12T10:23:01.123Z] [INFO]  [ORDER]     create order — start
   → {"userId": "u_001", "itemCount": 3}
 
-[2026-06-12T10:23:01.400Z] [INFO]  [INVENTORY] 扣除庫存 — start
+[2026-06-12T10:23:01.400Z] [INFO]  [INVENTORY] deduct stock — start
   → {"productId": "p_099", "requested": 2}
 
-[2026-06-12T10:23:01.456Z] [WARN]  [INVENTORY] 扣除庫存 — failed: 庫存不足
+[2026-06-12T10:23:01.456Z] [WARN]  [INVENTORY] deduct stock — failed: insufficient stock
   → {"productId": "p_099", "current": 0, "requested": 2}
 
-[2026-06-12T10:23:01.789Z] [ERROR] [PAYMENT]   金流 API 呼叫 — failed: Connection timeout
+[2026-06-12T10:23:01.789Z] [ERROR] [PAYMENT]   payment API call — failed: Connection timeout
   → {"message": "Connection timeout", "stack": "..."}
 
-[2026-06-12T10:23:01.800Z] [INFO]  [ORDER]     建立訂單 — end: success
+[2026-06-12T10:23:01.800Z] [INFO]  [ORDER]     create order — end: success
   → {"orderId": "o_001", "userId": "u_001"}
 ```
 
@@ -89,7 +89,7 @@ Every log message must follow this pattern:
 <operation> — <state>
 ```
 
-- `<operation>` is the action being performed (e.g. 建立訂單, 扣除庫存, 金流 API 呼叫)
+- `<operation>` is the action being performed (e.g. create order, deduct stock, payment API call)
 - `<state>` describes where in the operation this log fires
 
 | State | When to use |
