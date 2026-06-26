@@ -85,7 +85,7 @@ After task completion:
 
 1. Move Current Task to docs/changelog.md.
 2. Mark the task completed in docs/project-plan.md.
-3. Update docs/flows/module-data-flow.md with actual function names and file paths from the implementation.
+3. Update docs/modules/module-data-flow.md with actual function names and file paths from the implementation.
 4. Update docs/codebase-map.md with the files touched in this task, classified by layer (DB/BE/FE/MOD) and type (Package/Custom).
 5. Run the Document Update Checklist below. For each item, check yes/no — do not skip the check.
 6. Run the Module Completion Check below. Do not skip this check, even if the answer is usually "no."
@@ -102,7 +102,7 @@ Run this check after every task — most of the time the answer will be "no," bu
   * If yes: this module is now complete. Do all of the following:
     1. Insert logger calls into the module's code, following the rules defined in docs/specs/logging-spec.md (required log points, message format, logger instantiation). Direct print/console statements are not allowed.
        logging-spec.md itself is the rule definition — do not add module-specific content to it.
-       Create or update docs/flows/log-<module-name>.md to list every log point added, in call order.
+       Create or update docs/modules/<module-name>/log-<module-name>.md to list every log point added, in call order.
     2. Ask: "Would you like to add debug instrumentation to this module? (follows debug-instrumentation-rules.md)"
        * If yes: follow debug-instrumentation-rules.md and instrument the module.
        * If no: continue.
@@ -129,12 +129,12 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
 - [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
-- [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/flows/log-<module-name>.md.
+- [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/modules/<module-name>/log-<module-name>.md.
 - [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
 - [ ] docs/business/business-objects.md — were business entities added or changed? If yes, update.
 - [ ] docs/business/business-process.md — did the business workflow, decision points, or exceptions change? If yes, update.
-- [ ] docs/flows/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/flows/<module>-module-data-flow.md`
-- [ ] docs/flows/module-flow.md (or a dedicated process flow file) — did execution steps or cross-service calls change? If yes, update, then:
+- [ ] docs/modules/[module]/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
+- [ ] docs/modules/module-flow.md (or a dedicated process flow file) — did execution steps or cross-service calls change? If yes, update, then:
   - Regenerate activity diagram: `python3 docs/script/activity_to_html.py <flow-file>`
   - Regenerate sequence diagram: `python3 docs/script/sequence_to_html.py <flow-file>`
 
