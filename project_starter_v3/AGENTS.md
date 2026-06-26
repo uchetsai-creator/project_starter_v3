@@ -116,18 +116,24 @@ Run through every item below after every task. This is mandatory, not optional.
 
 - [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update.
 - [ ] docs/specs/quickstart.md — did setup steps, verification steps, or environment requirements change? If yes, update.
-- [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then regenerate the ERD by running `python3 docs/script/schema_to_html.py <schema file>`.
+- [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then:
+  - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file>`
+  - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 - [ ] docs/specs/api-contract.md — were endpoints added/changed, or did error codes or validation rules change? If yes, update.
-- [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update.
-- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate the diagram by running `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`.
-- [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update.
-- [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update.
+- [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
+- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
+- [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
+- [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
 - [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
 - [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/flows/log-<module-name>.md.
 - [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
 - [ ] docs/business/business-objects.md — were business entities added or changed? If yes, update.
 - [ ] docs/business/business-process.md — did the business workflow, decision points, or exceptions change? If yes, update.
+- [ ] docs/flows/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/flows/<module>-module-data-flow.md`
+- [ ] docs/flows/module-flow.md (or a dedicated process flow file) — did execution steps or cross-service calls change? If yes, update, then:
+  - Regenerate activity diagram: `python3 docs/script/activity_to_html.py <flow-file>`
+  - Regenerate sequence diagram: `python3 docs/script/sequence_to_html.py <flow-file>`
 
 For the full explanation of why each document updates on these triggers, see docs/rules/document-purposes.md.
 
