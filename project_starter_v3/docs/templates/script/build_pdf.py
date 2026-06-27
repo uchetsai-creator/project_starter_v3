@@ -44,7 +44,7 @@ DIAGRAM_TARGETS = {
     "schema":                 "specs/data-model.md",
     # State diagrams
     "data-model-state":       "specs/data-model.md",
-    "business-objects-state": "business/business-objects.md",
+    # *-object-state → matched dynamically in inject_diagrams
     # Use case diagram — lives in permissions.md
     "permissions-usecase":    "specs/permissions.md",
     # *-process-activity → matched dynamically in inject_diagrams
@@ -62,7 +62,7 @@ DIAGRAM_TARGETS = {
 PDF_ALLOWLIST = [
     # 1. Business — understand why before what
     ("business",       "business/business-process.md"),
-    ("business",       "business/business-objects.md"),
+    ("business",       "business/business-objects.md"),   # index
     ("business",       "business/business-rules.md"),
     # 2. Requirements — what to build
     ("requirements",   "project-requirements.md"),
@@ -199,9 +199,18 @@ def find_allowed_files(docs_dir, strings):
     for path in sorted(glob.glob(os.path.join(docs_dir, "business", "*-process.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
-            # Insert after business-process.md (index) — find its position
             for idx, (r, _, _) in enumerate(result):
                 if r == "business/business-process.md":
+                    result.insert(idx + 1, (rel, path, business_label))
+                    seen.add(rel)
+                    break
+
+    # Auto-include *-object.md files under business/ (one file per business object)
+    for path in sorted(glob.glob(os.path.join(docs_dir, "business", "*-object.md"))):
+        rel = os.path.relpath(path, docs_dir)
+        if rel not in seen:
+            for idx, (r, _, _) in enumerate(result):
+                if r == "business/business-objects.md":
                     result.insert(idx + 1, (rel, path, business_label))
                     seen.add(rel)
                     break
@@ -273,12 +282,23 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
             # Dynamic: order-create-process-activity → business/order-create-process.md
             m3 = re.match(r'^(.+)-activity$', key)
             if m3:
-                base = m3.group(1)  # e.g. order-flow or order-create-process
+                base = m3.group(1)
                 if base.endswith('-flow'):
                     module_name = base.replace('-flow', '')
                     target = f"modules/{module_name}/{base}.md"
                 elif base.endswith('-process'):
                     target = f"business/{base}.md"
+
+            # Dynamic: order-object-state → business/order-object.md
+            m4 = re.match(r'^(.+)-state$', key)
+            if m4:
+                base = m4.group(1)
+                if base.endswith('-object'):
+                    target = f"business/{base}.md"
+                elif base == 'data-model':
+                    target = 'specs/data-model.md'
+                elif base == 'business-objects':
+                    target = 'business/business-objects.md'
 
         if target != rel:
             continue
