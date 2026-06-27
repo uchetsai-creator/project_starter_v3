@@ -15,6 +15,12 @@ Update when:
 * NEEDS CLARIFICATION items are resolved
 * Architecture decisions change
 
+### quickstart.md
+Update when:
+* Setup steps change
+* New verification steps are added
+* Environment requirements change
+
 ### data-model.md
 Update when:
 * Schema changes
@@ -52,7 +58,7 @@ Update when:
 * Log format changes
 
 This file is the rule definition only — do not add module-specific logging content here.
-Module-specific log points live in docs/modules/<module-name>/log-<module-name>.md.
+Module-specific log points live in docs/flows/log-<module-name>.md.
 
 ---
 
@@ -178,11 +184,17 @@ Update when:
 
 ### business-objects.md
 Purpose:
-Describe business entities, their relationships, and status flow (including lifecycle
-sequence if statuses have a fixed order).
+Describe business entities, their relationships, and lifecycle at the business level.
+Includes a state block for the business-layer state machine — focus on who triggers transitions
+and what the business meaning is. Technical state details (ENUM values, DB constraints) belong
+in docs/specs/data-model.md.
 
 Update when:
 * Business entities are added or changed
+* Status transitions or responsible roles change
+
+After updating, regenerate state diagram:
+`python3 docs/script/state_to_html.py docs/business/business-objects.md`
 
 ### business-rules.md
 Purpose:
