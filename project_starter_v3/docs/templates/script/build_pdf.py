@@ -47,6 +47,8 @@ DIAGRAM_TARGETS = {
     "business-objects-state": "business/business-objects.md",
     # Use case diagram — lives in permissions.md
     "permissions-usecase":    "specs/permissions.md",
+    # Activity diagram — lives in business-process.md
+    "business-process-activity": "business/business-process.md",
     # Component diagrams
     "architecture-component": "architecture/architecture.md",
     "backend-component":      "architecture/backend.md",
