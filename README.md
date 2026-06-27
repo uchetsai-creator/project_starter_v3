@@ -155,9 +155,9 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 | `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
 | `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md` |
 | `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
-| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `modules/*/` flow files |
-| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | `modules/*/` flow files |
-| `class_to_html.py` | any `.md` (class block) | Class structure | `modules/*/*-module-data-flow.md` |
+| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `business/business-process.md` |
+| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | `modules/[module]/[module]-flow.md` |
+| `class_to_html.py` | any `.md` (class block) | Class structure | `modules/[module]/*-module-data-flow.md` |
 | `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
 
 ```bash
@@ -166,8 +166,8 @@ python3 docs/script/architecture_to_html.py docs/architecture/architecture.md
 python3 docs/script/schema_to_html.py path/to/schema.prisma
 python3 docs/script/state_to_html.py docs/specs/data-model.md
 python3 docs/script/usecase_to_html.py docs/specs/permissions.md
-python3 docs/script/activity_to_html.py docs/modules/order/order-module-flow.md
-python3 docs/script/sequence_to_html.py docs/modules/order/order-module-flow.md
+python3 docs/script/activity_to_html.py docs/business/business-process.md
+python3 docs/script/sequence_to_html.py docs/modules/order/order-flow.md
 python3 docs/script/class_to_html.py docs/modules/order/order-module-data-flow.md
 python3 docs/script/component_to_html.py docs/architecture/backend.md
 ```
