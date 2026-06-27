@@ -150,18 +150,28 @@ Update when:
 After updating, regenerate class diagram:
 `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
 
+### module-flow.md
+Purpose:
+Index and rule definition for all module flow documents.
+Each module has its own flow file: `docs/modules/[module]/[module]-flow.md`.
+
+Update when:
+* A new module flow file is created — add a row to the Flow Files table
+
 ### [module]-flow.md
 Purpose:
-Describe cross-module service call sequences for a specific process.
-Includes a Sequence Diagram showing which service calls which service in what order.
-Business steps and decision branches belong in docs/business/business-process.md.
+Describe cross-module service call sequences for a specific module.
+Includes a Sequence Diagram for each cross-module process.
+Business steps and decision branches belong in docs/business/[process-name]-process.md.
 
 Location: `docs/modules/[module]/[module]-flow.md`
 Example: `docs/modules/order/order-flow.md`
 
+Files matching `*-flow.md` are automatically included in the PDF.
+
 Update when:
 * Cross-module service calls change
-* A new cross-module process is added
+* A new cross-module process is added to this module
 
 After updating, regenerate sequence diagram:
 `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
