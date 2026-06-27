@@ -42,8 +42,9 @@ DIAGRAM_TARGETS = {
     # Original two
     "architecture":           "architecture/architecture.md",
     "schema":                 "specs/data-model.md",
-    # State diagram — lives in data-model.md
+    # State diagrams
     "data-model-state":       "specs/data-model.md",
+    "business-objects-state": "business/business-objects.md",
     # Use case diagram — lives in permissions.md
     "permissions-usecase":    "specs/permissions.md",
     # Component diagrams
