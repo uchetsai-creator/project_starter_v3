@@ -44,9 +44,13 @@ Update when:
 * New roles are added
 * Permission matrix changes
 * New endpoints are added to API contract
+* New features are added to the system
 
 After updating, regenerate use case diagram:
 `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
+
+The use case diagram is a **system-level view** — it lists ALL roles and ALL major
+functions across all modules in one diagram, not per resource or per module.
 
 ### logging-spec.md
 Purpose:
