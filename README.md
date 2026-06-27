@@ -51,7 +51,7 @@ project_starter_v3/                  ← this repo (template only)
     │
     ├── modules/
     │   ├── module-data-flow.md      ← index + rules for code-level flow files (per module)
-    │   └── module-flow.md           ← detailed execution steps for a business process
+    │   └── module-flow.md           ← index + rules for cross-module sequence files (per module)
     │
     └── script/
         ├── architecture_to_html.py  ← architecture.md → interactive HTML + static SVG
@@ -206,7 +206,9 @@ reads exactly like `docs/`.
 > may need manual review after translation.
 
 To add a new document to the PDF, add it to `PDF_ALLOWLIST` in **both** `build_pdf.py` and
-`translate_docs.py` — they each maintain their own copy of the list.
+`translate_docs.py` — they each maintain their own copy of the list. Note that
+`business/*-process.md`, `business/*-object.md`, and `modules/*/*-module-data-flow.md`
+are auto-scanned and do not need to be added manually.
 
 ---
 
