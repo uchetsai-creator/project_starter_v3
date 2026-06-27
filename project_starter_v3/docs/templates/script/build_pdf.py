@@ -40,20 +40,17 @@ import cairosvg
 # For *-module-data-flow-class diagrams, the target is resolved dynamically in inject_diagrams.
 DIAGRAM_TARGETS = {
     # Original two
-    "architecture":          "architecture/architecture.md",
-    "schema":                "specs/data-model.md",
+    "architecture":           "architecture/architecture.md",
+    "schema":                 "specs/data-model.md",
     # State diagram — lives in data-model.md
-    "data-model-state":      "specs/data-model.md",
+    "data-model-state":       "specs/data-model.md",
     # Use case diagram — lives in permissions.md
-    "permissions-usecase":   "specs/permissions.md",
-    # Activity and sequence — both live in module-flow.md (the template)
-    # Individual *-module-flow-activity / *-module-flow-sequence are matched dynamically below
-    "module-flow-activity":  "flows/module-flow.md",
-    "module-flow-sequence":  "flows/module-flow.md",
-    # Component diagrams — live in their respective architecture docs
-    "backend-component":     "architecture/backend.md",
-    "frontend-component":    "architecture/frontend.md",
-    # *-module-data-flow-class → matched dynamically in inject_diagrams
+    "permissions-usecase":    "specs/permissions.md",
+    # Component diagrams
+    "architecture-component": "architecture/architecture.md",
+    "backend-component":      "architecture/backend.md",
+    "frontend-component":     "architecture/frontend.md",
+    # activity/sequence/*-class are matched dynamically in inject_diagrams
 }
 
 # Explicit allowlist — the only files that appear in the PDF, in display order.
@@ -187,7 +184,12 @@ def find_allowed_files(docs_dir, strings):
     for path in sorted(glob.glob(os.path.join(docs_dir, "modules", "*", "*-module-data-flow.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
-            # Insert before codebase-map (last entry) so flow files sit under Flows
+            result.insert(-1, (rel, path, flows_label))
+
+    # Also auto-include *-flow.md files directly under modules/ (e.g. order-flow.md)
+    for path in sorted(glob.glob(os.path.join(docs_dir, "modules", "*", "*-flow.md"))):
+        rel = os.path.relpath(path, docs_dir)
+        if rel not in seen:
             result.insert(-1, (rel, path, flows_label))
 
     return result
@@ -226,6 +228,14 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
                 base = m.group(1)  # e.g. order-module-data-flow
                 # Extract module name: order-module-data-flow -> order
                 module_name = base.replace('-module-data-flow', '')
+                target = f"modules/{module_name}/{base}.md"
+
+            # Dynamic: order-flow-activity / order-flow-sequence → modules/order/order-flow.md
+            m2 = re.match(r'^(.+)-(activity|sequence)$', key)
+            if m2:
+                base = m2.group(1)  # e.g. order-flow
+                # Extract module name: order-flow -> order
+                module_name = base.replace('-flow', '')
                 target = f"modules/{module_name}/{base}.md"
 
         if target != rel:
