@@ -193,7 +193,7 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
 - [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/modules/<module-name>/log-<module-name>.md.
 - [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
-- [ ] docs/business/business-objects.md — were business entities added or changed? If yes, update.
+- [ ] docs/business/business-objects.md — were business entities added or changed? If yes, update, then regenerate state diagram: `python3 docs/script/state_to_html.py docs/business/business-objects.md`
 - [ ] docs/business/business-process.md — did the business workflow, decision points, or exceptions change? If yes, update.
 - [ ] docs/modules/[module]/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
 - [ ] docs/modules/module-flow.md (or a dedicated process flow file) — did execution steps or cross-service calls change? If yes, update, then:
