@@ -47,27 +47,32 @@ src/
 ## Component Structure
 
 <!--
+  Describes the backend module dependency structure.
+  Fill in based on the actual stack and layer pattern described above.
+  Use real layer names from your Stack and Layering sections above.
+  e.g. if your stack uses Controller → Service → Repository, use those names.
+       if your stack uses Handler → UseCase → Store, use those names instead.
   After writing, run: python3 docs/script/component_to_html.py docs/architecture/backend.md
 -->
 
 ```component
 title: Backend Module Structure
 
-component "[Module A]" as ModA {
-  provides: [method1, method2]
-  requires: [Module B]
+component "[e.g., Controller / Handler / Router]" as Layer1 {
+  provides: [e.g., HTTP endpoints]
+  requires: Layer2
 }
 
-component "[Module B]" as ModB {
-  provides: [method1]
-  requires: Database
+component "[e.g., Service / UseCase / Domain]" as Layer2 {
+  provides: [e.g., business logic]
+  requires: Layer3
 }
 
-component "Database" as DB {
-  provides: CRUD operations
-  requires:
+component "[e.g., Repository / Store / DAO]" as Layer3 {
+  provides: [e.g., DB queries]
+  requires: [e.g., Database]
 }
 
-ModA --> ModB : uses
-ModB --> DB : queries
+Layer1 --> Layer2 : uses
+Layer2 --> Layer3 : uses
 ```
