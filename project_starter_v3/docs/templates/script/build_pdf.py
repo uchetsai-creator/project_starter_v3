@@ -297,8 +297,6 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
                     target = f"business/{base}.md"
                 elif base == 'data-model':
                     target = 'specs/data-model.md'
-                elif base == 'business-objects':
-                    target = 'business/business-objects.md'
 
         if target != rel:
             continue
