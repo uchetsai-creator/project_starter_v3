@@ -92,29 +92,48 @@
 
 ## Use Case Diagram
 
+<!--
+  System-level view — list ALL roles and ALL major functions across all modules.
+  Not per resource, not per module — the whole system in one diagram.
+  After writing, run: python3 docs/script/usecase_to_html.py docs/specs/permissions.md
+-->
+
 ```usecase
-title: [Resource] Access Control
+title: [System Name] — Access Control
 
 actor Guest
 actor User
 actor Admin
 
-usecase "[resource] Read" as UC1
-usecase "[resource] Create" as UC2
-usecase "[resource] Update Own" as UC3
-usecase "[resource] Delete Own" as UC4
-usecase "[resource] Update Any" as UC5
-usecase "[resource] Delete Any" as UC6
+# [Feature A]
+usecase "[Feature A] Read" as UC1
+usecase "[Feature A] Create" as UC2
+usecase "[Feature A] Update Own" as UC3
+usecase "[Feature A] Delete Own" as UC4
+usecase "[Feature A] Manage All" as UC5
+
+# [Feature B]
+usecase "[Feature B] Read" as UC6
+usecase "[Feature B] Create" as UC7
+usecase "[Feature B] Manage All" as UC8
+
+# [Admin only]
+usecase "[Admin Feature] Configure" as UC9
 
 Guest --> UC1
 User --> UC1
 User --> UC2
 User --> UC3
 User --> UC4
+User --> UC6
+User --> UC7
 Admin --> UC1
 Admin --> UC2
 Admin --> UC3
 Admin --> UC4
 Admin --> UC5
 Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
 ```
