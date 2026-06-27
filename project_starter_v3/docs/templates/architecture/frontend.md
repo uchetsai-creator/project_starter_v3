@@ -50,27 +50,32 @@ src/
 ## Component Structure
 
 <!--
+  Describes the frontend module dependency structure.
+  Fill in based on the actual stack and layer pattern described above.
+  Use real layer names from your Stack and Component Strategy sections above.
+  e.g. if your stack uses Page → Hook → API Client, use those names.
+       if your stack uses View → Store → API, use those names instead.
   After writing, run: python3 docs/script/component_to_html.py docs/architecture/frontend.md
 -->
 
 ```component
 title: Frontend Module Structure
 
-component "[Feature] Page" as Page {
-  provides: [FeaturePage]
-  requires: [Feature] Hook, [Feature] Form
+component "[e.g., Page / View / Screen]" as Layer1 {
+  provides: [e.g., UI, user interaction]
+  requires: Layer2
 }
 
-component "[Feature] Hook" as Hook {
-  provides: use[Feature]
-  requires: API Client
+component "[e.g., Hook / Store / ViewModel]" as Layer2 {
+  provides: [e.g., state, data fetching]
+  requires: Layer3
 }
 
-component "API Client" as API {
-  provides: apiGet, apiPost
-  requires: Browser Fetch API
+component "[e.g., API Client / HTTP Layer]" as Layer3 {
+  provides: [e.g., HTTP calls]
+  requires: [e.g., Auth Token, Backend]
 }
 
-Page --> Hook : uses
-Hook --> API : calls
+Layer1 --> Layer2 : uses
+Layer2 --> Layer3 : calls
 ```
