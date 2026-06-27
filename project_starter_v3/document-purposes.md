@@ -150,20 +150,21 @@ Update when:
 After updating, regenerate class diagram:
 `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
 
-### module-flow.md
+### [module]-flow.md
 Purpose:
-Describe detailed execution steps for a business process, when business-process.md is not
-granular enough. Sits at `docs/modules/module-flow.md` (shared) or create a dedicated
-`docs/modules/[module]/[module]-flow.md` for a specific module's flow.
-Includes both an activity block (execution steps) and a sequence block (cross-service calls).
+Describe cross-module service call sequences for a specific process.
+Includes a Sequence Diagram showing which service calls which service in what order.
+Business steps and decision branches belong in docs/business/business-process.md.
+
+Location: `docs/modules/[module]/[module]-flow.md`
+Example: `docs/modules/order/order-flow.md`
 
 Update when:
-* A business process requiring operational detail is added or changes
-* Cross-service call sequence changes
+* Cross-module service calls change
+* A new cross-module process is added
 
-After updating, regenerate both diagrams:
-* Activity: `python3 docs/script/activity_to_html.py <flow-file>`
-* Sequence: `python3 docs/script/sequence_to_html.py <flow-file>`
+After updating, regenerate sequence diagram:
+`python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
 
 ### log-<module-name>.md
 Purpose:
@@ -181,10 +182,14 @@ Update immediately if function names or file paths change.
 ### business-process.md
 Purpose:
 Describe high-level business workflows — goal, process steps, decision points, exceptions,
-pain points. Detailed execution steps belong in docs/flows/module-flow.md.
+pain points. Includes an Activity Diagram describing business steps and decision branches.
+Cross-module technical call sequences belong in docs/modules/[module]/[module]-flow.md.
 
 Update when:
 * The business workflow, decision points, or exceptions change
+
+After updating, regenerate activity diagram:
+`python3 docs/script/activity_to_html.py docs/business/business-process.md`
 
 ### business-objects.md
 Purpose:
