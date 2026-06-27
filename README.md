@@ -18,7 +18,7 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
    following the checklist in `AGENTS.md`.
 
 ```
-project_starter_v2_note-main/        ← this repo (template only)
+project_starter_v3/                  ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
 ├── code-quality-check.md            ← code review checklist for retrofitting existing projects
@@ -45,8 +45,8 @@ project_starter_v2_note-main/        ← this repo (template only)
     │   └── deployment.md            ← services, env vars, startup flow, verification steps
     │
     ├── business/
-    │   ├── business-process.md      ← high-level workflows, decision points, exceptions
-    │   ├── business-objects.md      ← entities, relationships, status flow
+    │   ├── business-process.md      ← index + rules for business process files (per process)
+    │   ├── business-objects.md      ← index + rules for business object files (per object)
     │   └── business-rules.md        ← approval/validation/notification/audit rules
     │
     ├── modules/
@@ -89,6 +89,11 @@ new_project/
     ├── specs/
     ├── architecture/
     ├── business/
+    │   ├── business-process.md            ← index
+    │   ├── [process-name]-process.md      ← one per business process, auto-included in PDF
+    │   ├── business-objects.md            ← index
+    │   ├── [object-name]-object.md        ← one per business object, auto-included in PDF
+    │   └── business-rules.md
     ├── modules/
     │   ├── module-data-flow.md            ← index file
     │   ├── module-flow.md                 ← shared process flow template
@@ -153,9 +158,9 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 |---|---|---|---|
 | `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md` |
 | `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
-| `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md` |
+| `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md`, `business/*-object.md` |
 | `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
-| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `business/business-process.md` |
+| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `business/*-process.md` |
 | `sequence_to_html.py` | any `.md` (sequence block) | Sequence | `modules/[module]/[module]-flow.md` |
 | `class_to_html.py` | any `.md` (class block) | Class structure | `modules/[module]/*-module-data-flow.md` |
 | `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
@@ -165,8 +170,9 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 python3 docs/script/architecture_to_html.py docs/architecture/architecture.md
 python3 docs/script/schema_to_html.py path/to/schema.prisma
 python3 docs/script/state_to_html.py docs/specs/data-model.md
+python3 docs/script/state_to_html.py docs/business/order-object.md
 python3 docs/script/usecase_to_html.py docs/specs/permissions.md
-python3 docs/script/activity_to_html.py docs/business/business-process.md
+python3 docs/script/activity_to_html.py docs/business/order-create-process.md
 python3 docs/script/sequence_to_html.py docs/modules/order/order-flow.md
 python3 docs/script/class_to_html.py docs/modules/order/order-module-data-flow.md
 python3 docs/script/component_to_html.py docs/architecture/backend.md
