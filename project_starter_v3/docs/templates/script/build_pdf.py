@@ -47,8 +47,7 @@ DIAGRAM_TARGETS = {
     "business-objects-state": "business/business-objects.md",
     # Use case diagram — lives in permissions.md
     "permissions-usecase":    "specs/permissions.md",
-    # Activity diagram — lives in business-process.md
-    "business-process-activity": "business/business-process.md",
+    # *-process-activity → matched dynamically in inject_diagrams
     # Component diagrams
     "architecture-component": "architecture/architecture.md",
     "backend-component":      "architecture/backend.md",
@@ -195,6 +194,18 @@ def find_allowed_files(docs_dir, strings):
         if rel not in seen:
             result.insert(-1, (rel, path, flows_label))
 
+    # Auto-include *-process.md files under business/ (one file per business process)
+    business_label = strings["sections"]["business"]
+    for path in sorted(glob.glob(os.path.join(docs_dir, "business", "*-process.md"))):
+        rel = os.path.relpath(path, docs_dir)
+        if rel not in seen:
+            # Insert after business-process.md (index) — find its position
+            for idx, (r, _, _) in enumerate(result):
+                if r == "business/business-process.md":
+                    result.insert(idx + 1, (rel, path, business_label))
+                    seen.add(rel)
+                    break
+
     return result
 
 
@@ -209,8 +220,26 @@ def find_html_svg_pairs(docs_dir):
     return pairs
 
 
-def svg_to_png(svg_path, out_path, width=1400):
-    cairosvg.svg2png(url=svg_path, write_to=out_path, output_width=width)
+def svg_to_png(svg_path, out_path, max_width=1400, max_height=1600):
+    """Convert SVG to PNG, scaling to fit within max_width x max_height."""
+    import xml.etree.ElementTree as ET
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    vb = root.get('viewBox', '')
+    if vb:
+        parts = vb.split()
+        svg_w = float(parts[2])
+        svg_h = float(parts[3])
+        scale_w = max_width / svg_w
+        scale_h = max_height / svg_h
+        scale = min(scale_w, scale_h)
+        out_w = int(svg_w * scale)
+        out_h = int(svg_h * scale)
+    else:
+        out_w = max_width
+        out_h = None
+    cairosvg.svg2png(url=svg_path, write_to=out_path,
+                     output_width=out_w, output_height=out_h)
     return out_path
 
 
@@ -233,13 +262,23 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
                 module_name = base.replace('-module-data-flow', '')
                 target = f"modules/{module_name}/{base}.md"
 
-            # Dynamic: order-flow-activity / order-flow-sequence → modules/order/order-flow.md
-            m2 = re.match(r'^(.+)-(activity|sequence)$', key)
+            # Dynamic: order-flow-sequence → modules/order/order-flow.md
+            m2 = re.match(r'^(.+)-sequence$', key)
             if m2:
                 base = m2.group(1)  # e.g. order-flow
-                # Extract module name: order-flow -> order
                 module_name = base.replace('-flow', '')
                 target = f"modules/{module_name}/{base}.md"
+
+            # Dynamic: order-flow-activity → modules/order/order-flow.md
+            # Dynamic: order-create-process-activity → business/order-create-process.md
+            m3 = re.match(r'^(.+)-activity$', key)
+            if m3:
+                base = m3.group(1)  # e.g. order-flow or order-create-process
+                if base.endswith('-flow'):
+                    module_name = base.replace('-flow', '')
+                    target = f"modules/{module_name}/{base}.md"
+                elif base.endswith('-process'):
+                    target = f"business/{base}.md"
 
         if target != rel:
             continue
@@ -251,13 +290,32 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
 
         png_rel = os.path.relpath(png_path, docs_dir)
         html_rel = os.path.relpath(pair["html"], docs_dir)
-        block = (
-            f"\n\n> **{strings['diagram_label']}: {key}**\n"
-            f">\n"
-            f"> ![{key} diagram]({png_rel})\n"
-            f">\n"
-            f"> 🔗 [{strings['diagram_link']}]({html_rel})\n\n"
-        )
+
+        # Check if image is tall (height > width) — use full-page display
+        from PIL import Image
+        img = Image.open(png_path)
+        img_w, img_h = img.size
+        is_tall = img_h > img_w * 1.5
+
+        if is_tall:
+            block = (
+                f'\n\n<div style="page-break-before: always; text-align: center; padding: 24px;">'
+                f'<p style="font-weight:bold; color:#2D3748; margin-bottom:8px;">'
+                f'{strings["diagram_label"]}: {key}</p>'
+                f'<img src="{png_rel}" style="max-width:90%; max-height:90vh; object-fit:contain;"/>'
+                f'<p style="margin-top:8px;">'
+                f'<a href="{html_rel}" style="color:#3182CE;">'
+                f'🔗 {strings["diagram_link"]}</a></p>'
+                f'</div>\n\n'
+            )
+        else:
+            block = (
+                f"\n\n> **{strings['diagram_label']}: {key}**\n"
+                f">\n"
+                f"> ![{key} diagram]({png_rel})\n"
+                f">\n"
+                f"> 🔗 [{strings['diagram_link']}]({html_rel})\n\n"
+            )
         md_text += block
 
     return md_text
@@ -369,6 +427,12 @@ blockquote {{
     margin: 12px 0;
     padding: 8px 16px;
     background: #EBF8FF;
+}}
+blockquote img {{
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
 }}
 img {{ max-width: 100%; }}
 a {{ color: #3182CE; text-decoration: none; }}
