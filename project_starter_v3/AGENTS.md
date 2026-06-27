@@ -198,7 +198,8 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/business/[process-name]-process.md — did the business workflow, decision points, or exceptions change for this process? If yes, update, then regenerate activity diagram: `python3 docs/script/activity_to_html.py docs/business/<process-name>-process.md`
 - [ ] docs/business/business-process.md — was a new business process file created? If yes, add a row to the index table.
 - [ ] docs/modules/[module]/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
-- [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
+- [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change for this module? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
+- [ ] docs/modules/module-flow.md — was a new module flow file created? If yes, add a row to the Flow Files table.
 
 For the full explanation of why each document updates on these triggers, see docs/rules/document-purposes.md.
 
