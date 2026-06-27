@@ -1,56 +1,36 @@
-# module-flow.md
+# [Module Name] Flow
 
-Purpose:
+<!--
+  Describes cross-module interactions for a specific business process.
+  One flow file per process (e.g., order-flow.md, payment-flow.md).
 
-Describe detailed execution steps for a business process.
+  This file contains the Sequence Diagram only:
+  - Sequence Diagram: which service calls which service, in what order
+  - Activity Diagram belongs in docs/business/business-process.md — not here
 
-Create a dedicated flow document when a business process requires operational detail.
+  After writing, run:
+  python3 docs/script/sequence_to_html.py docs/modules/[module]/[module]-flow.md
 
-Rules:
-
-- Focus on execution flow
-- Include business actions
-- Include system actions when relevant
-- Keep chronological order
-- One flow document per business process
-- Include all three formats below: text (quick read), activity block (execution steps), sequence block (cross-service calls)
-- After writing, run:
-  - python3 docs/script/activity_to_html.py <this-file>
-  - python3 docs/script/sequence_to_html.py <this-file>
+  Naming convention: [module-name]-flow.md
+  Location: docs/modules/[module]/[module]-flow.md
+  Example: docs/modules/order/order-flow.md
+-->
 
 ---
 
-## Process: [Flow Name]
+## Process: [Flow Name, e.g., Create Order]
 
 ### Text Overview
 
+Cross-module call sequence at a glance:
+
 ```
-[Step A]
-↓
-[Step B]
-↓
-[Decision Point]?
-├─ Yes → [Step C]
-└─ No  → [Step D]
-↓
-[Step E]
-```
-
-### Activity Diagram
-
-```activity
-title: [Flow Name]
-
-start
-:[Step A];
-:[Step B];
-if ([Decision Point]?) then (yes)
-  :[Step C];
-else (no)
-  :[Step D];
-endif
-:[Step E];
-stop
+[Caller] → [Service A]: [action]
+           [Service A] → [Service B]: [action]
+                         [Service B] → [Service C]: [action]
+                         [Service C] → [Service B]: [response]
+           [Service A] ← [Service B]: [response]
+[Caller] ← [Service A]: [final response]
 ```
 
 ### Sequence Diagram
@@ -58,8 +38,36 @@ stop
 ```sequence
 title: [Flow Name]
 
-[Service A] -> [Service B]: [message / action]
-[Service B] -> [Service C]: [message / action]
-[Service C] --> [Service B]: [response]
+[Client / Entry Point] -> [Service A]: [method or HTTP call]
+[Service A] -> [Service B]: [method call]
 [Service B] --> [Service A]: [response]
+[Service A] -> [Service C]: [method call]
+[Service C] --> [Service A]: [response]
+[Service A] --> [Client / Entry Point]: [final response]
+```
+
+---
+
+## Process: [Another Flow Name, e.g., Cancel Order]
+
+### Text Overview
+
+```
+[Caller] → [Service A]: [action]
+           [Service A] → [Service B]: [action]
+           [Service A] → [Service C]: [action]
+[Caller] ← [Service A]: [response]
+```
+
+### Sequence Diagram
+
+```sequence
+title: [Another Flow Name]
+
+[Client / Entry Point] -> [Service A]: [method or HTTP call]
+[Service A] -> [Service B]: [method call]
+[Service B] --> [Service A]: [response]
+[Service A] -> [Service C]: [method call]
+[Service C] --> [Service A]: [response]
+[Service A] --> [Client / Entry Point]: [final response]
 ```
