@@ -26,6 +26,8 @@
   flag it for review — it may be replaceable with a package.
 -->
 
+<!-- diagram: architecture -->
+
 ---
 
 ## Project Structure
