@@ -1,5 +1,19 @@
 # AGENTS
 
+## Path Convention
+
+Module flow files live in: `docs/modules/`
+Codebase map lives in: `docs/codebase-map.md`
+Document purposes reference lives in: `document-purposes.md` (repo root)
+
+If your project uses different folder names, search-replace the paths in this file
+before starting. For example, if you use `docs/flows/` instead of `docs/modules/`:
+  - Search: `docs/modules/`
+  - Replace: `docs/flows/`
+  - Also update `pdf_allowlist.py` to match.
+
+---
+
 ## Project Initialization
 
 If starting a new project:
