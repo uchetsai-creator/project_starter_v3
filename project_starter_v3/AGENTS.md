@@ -217,7 +217,7 @@ Run this check after every task — most of the time the answer will be "no," bu
 
 Run through every item below after every task. This is mandatory, not optional.
 
-- [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update.
+- [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update. Note: research.md is excluded from the PDF by default (pdf_allowlist.py) — uncomment its entry once it has real content.
 - [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then:
   - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file>`
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
@@ -237,8 +237,9 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/business/[process-name]-process.md — did the business workflow, decision points, or exceptions change for this process? If yes, update, then regenerate activity diagram: `python3 docs/script/activity_to_html.py docs/business/<process-name>-process.md`
 - [ ] docs/business/business-process.md — was a new business process file created? If yes, add a row to the index table.
 - [ ] docs/modules/[module]/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
+- [ ] docs/modules/module-data-flow.md index table — open the file and verify the current module has a row in the Module Flow Files table. If the row is missing, add it now. Do not rely on memory — read the file.
 - [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change for this module? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
-- [ ] docs/modules/module-flow.md — was a new module flow file created? If yes, add a row to the Flow Files table.
+- [ ] docs/modules/module-flow.md index table — open the file and verify the current module has a row in the Flow Files table (only if a [module]-flow.md exists for this module). If the row is missing, add it now. Do not rely on memory — read the file.
 
 For the full explanation of why each document updates on these triggers, see document-purposes.md.
 
