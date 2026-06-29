@@ -27,12 +27,16 @@ PDF_ALLOWLIST = [
     ("architecture",   "architecture/database.md"),
     ("architecture",   "architecture/deployment.md"),
     # 4. Specifications — how it is implemented
+    ("specifications", "specs/quickstart.md"),
     ("specifications", "specs/data-model.md"),
     ("specifications", "specs/api-contract.md"),
     ("specifications", "specs/permissions.md"),
     ("specifications", "specs/logging-spec.md"),
     ("specifications", "specs/research.md"),
     # 5. Flows — how it runs (individual *-module-data-flow.md added automatically)
+    # Note: "modules/" is the default folder name from the template.
+    # If your project renamed it (e.g. "flows/"), update this path and the auto-scan
+    # patterns in build_pdf.py (find_allowed_files) to match.
     ("flows",          "modules/module-data-flow.md"),
     # 6. Project Status
     ("project",        "codebase-map.md"),
