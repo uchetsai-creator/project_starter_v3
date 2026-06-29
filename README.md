@@ -189,14 +189,14 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 
 | Script | Input | Diagram type | Where it's embedded |
 |---|---|---|---|
-| `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md`, `codebase-map.md` |
+| `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md` |
 | `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
 | `state_to_html.py` | any `.md` (one or more state blocks) | State machine | `specs/data-model.md`, `business/*-object.md` |
 | `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
 | `activity_to_html.py` | any `.md` (one or more activity blocks) | Activity flow | `business/*-process.md` |
 | `sequence_to_html.py` | any `.md` (one or more sequence blocks) | Sequence | `modules/[module]/[module]-flow.md` |
 | `class_to_html.py` | any `.md` (one or more class blocks) | Class structure | `modules/[module]/*-module-data-flow.md` |
-| `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
+| `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` / `codebase-map.md` |
 
 > **Multiple blocks per file:** all six UML scripts support multiple diagram blocks in a
 > single `.md` file. Each block generates its own HTML + SVG pair, named by its `title:`
