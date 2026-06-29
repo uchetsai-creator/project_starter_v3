@@ -8,6 +8,7 @@ Include:
 - Environment variables
 - Local startup flow
 - Build/deploy flow
+- Verification steps
 
 Avoid:
 - Business requirements
@@ -17,22 +18,39 @@ Avoid:
 
 ## Services
 
+<!--
+  List every service that needs to be running for the system to work.
+  Port is optional — omit if not applicable (e.g. serverless, managed services).
+
+  Examples:
+    frontend    React / Vite          5173   serves the UI
+    backend     Express / Node.js     4000   REST API
+    database    PostgreSQL 16         5432   primary data store
+    cache       Redis 7               6379   session and query cache
+    queue       RabbitMQ              5672   async job queue
+    worker      BullMQ worker         —      processes background jobs
+    storage     MinIO (S3-compatible) 9000   file uploads (local only; S3 in prod)
+-->
+
 | Service | Technology | Port | Description |
 |---|---|---|---|
-| [e.g., frontend] | [e.g., React / Vite] | [e.g., 5173] | [description] |
-| [e.g., backend] | [e.g., Express / Node.js] | [e.g., 4000] | [description] |
-| [e.g., database] | [e.g., PostgreSQL 16] | [e.g., 5432] | [description] |
-| [e.g., cache] | [e.g., Redis] | [e.g., 6379] | [description] |
+| [service name] | [technology and version] | [port or —] | [description] |
 
 ---
 
 ## Environment Variables
 
+<!--
+  List every environment variable the system reads.
+  Remove DATABASE_URL and JWT_SECRET if your project does not use them —
+  these are examples, not requirements.
+  Add all variables your project actually uses.
+-->
+
 | Variable | Required | Description | Example |
 |---|---|---|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/db` |
-| `JWT_SECRET` | ✅ | Secret for signing JWT tokens | `[random 32-char string]` |
-| `[VAR_NAME]` | ✅ / ❌ | [description] | [example value] |
+| `[VAR_NAME]` | ✅ | [what it controls] | `[example value]` |
+| `[VAR_NAME]` | ❌ | [what it controls, and what the default is] | `[example value]` |
 
 Copy `.env.example` to `.env` and fill in the values before starting.
 
@@ -40,52 +58,75 @@ Copy `.env.example` to `.env` and fill in the values before starting.
 
 ## Local Startup Flow
 
+<!--
+  List the exact commands to get the system running locally.
+  Adapt to whatever tools and package manager this project uses.
+  Remove steps that don't apply (e.g. no migrations for a document DB).
+
+  Common patterns:
+    Docker Compose:   docker compose up -d
+    Node.js:          npm install / pnpm install / yarn
+    Python:           pip install -r requirements.txt / poetry install
+    Go:               go mod download
+    Ruby:             bundle install
+    Migrations:       prisma migrate dev / rails db:migrate / alembic upgrade head / go run ./cmd/migrate
+    Dev server:       npm run dev / python manage.py runserver / go run . / rails server
+-->
+
 Prerequisites:
-- [e.g., Docker Desktop, Node.js 22+, pnpm]
+- [required tools and versions, e.g., Docker Desktop, Node.js 22+, Python 3.12+]
 
 ```bash
-# 1. Start infrastructure services
-[e.g., docker compose up -d]
+# 1. [Step description]
+[command]
 
-# 2. Install dependencies
-[e.g., pnpm install]
+# 2. [Step description]
+[command]
 
-# 3. Run database migrations
-[e.g., pnpm prisma migrate dev]
-
-# 4. Start development servers
-[e.g., pnpm dev]
+# 3. [Step description]
+[command]
 ```
 
 Expected state when running:
-- [e.g., Frontend available at http://localhost:5173]
-- [e.g., Backend API available at http://localhost:4000]
-- [e.g., Health check: curl http://localhost:4000/health → {"status":"ok"}]
+- [service] available at [URL or description]
+- [health check command and expected output]
 
 ---
 
 ## Build / Deploy Flow
 
+<!--
+  Describe how to build and deploy the system.
+  Adapt to whatever CI/CD and hosting platform this project uses.
+
+  Examples:
+    docker compose build && docker push myapp:latest
+    pnpm build → deploy to Vercel via git push
+    go build -o bin/server → rsync to VPS
+    railway up
+    fly deploy
+    kubectl apply -f k8s/
+    serverless deploy
+    eb deploy
+-->
+
 ### Build
 
 ```bash
-[e.g., docker compose build]
-[e.g., pnpm build]
+[build command(s)]
 ```
 
 ### Deploy
 
 ```bash
-[e.g., docker push myapp:latest]
-[e.g., kubectl apply -f k8s/]
-[e.g., railway up]
+[deploy command(s)]
 ```
 
-### Environment
+### Environments
 
 | Environment | URL | Notes |
 |---|---|---|
-| Local | `http://localhost:[port]` | Docker Compose |
+| Local | `http://localhost:[port]` | [local setup description] |
 | Staging | `[URL]` | [hosting platform] |
 | Production | `[URL]` | [hosting platform] |
 
@@ -95,11 +136,7 @@ Expected state when running:
 
 How to confirm the system is running correctly after startup.
 
-- [ ] **[Feature name] — [What to verify]**
-  Run: `[exact command]`
-  Expected: `[exact output]`
-
-- [ ] **[Feature name] — [What to verify]**
+- [ ] **[What to verify]**
   Run: `[exact command]`
   Expected: `[exact output]`
 
