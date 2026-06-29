@@ -3,21 +3,37 @@
 <!--
   Describes roles, permission definitions, and access control for every API endpoint.
   Corresponds to every endpoint in api-contract.md.
+
+  Access control model: fill in the actual model used in this project.
+  Common models:
+    RBAC  — Role-Based Access Control (roles assigned to users, permissions assigned to roles)
+    ABAC  — Attribute-Based Access Control (permissions based on user/resource attributes)
+    ACL   — Access Control List (per-resource permission entries)
+    Ownership-only — no roles, each user can only access their own resources
+
+  The Role Definitions, Permission Definitions, and RBAC Matrix sections below
+  assume RBAC. If the project uses a different model, replace those sections
+  with whatever structure best describes the actual access control design.
+
   After writing, run: python3 docs/script/usecase_to_html.py docs/specs/permissions.md
 -->
 
-**Access Control Model:** RBAC
+**Access Control Model:** [RBAC / ABAC / ACL / Ownership-only / other]
 
 ---
 
 ## Role Definitions
 
+<!--
+  List the actual roles in this project.
+  The three roles below (GUEST / USER / ADMIN) are examples — replace with real role names.
+  Inherits from is optional — omit the column if roles do not inherit from each other.
+-->
+
 | Role | Description | Inherits from |
 |---|---|---|
-| `ROLE_GUEST` | Unauthenticated user, public resources only | — |
-| `ROLE_USER` | Authenticated user, own resources only | `ROLE_GUEST` |
-| `ROLE_ADMIN` | Full access to all resources | `ROLE_USER` |
-| `[ROLE_ID]` | [Description] | [Inherits from] |
+| `[ROLE_NAME]` | [Who this role represents and what they can access] | [— or parent role] |
+| `[ROLE_NAME]` | [Description] | [— or parent role] |
 
 ---
 
