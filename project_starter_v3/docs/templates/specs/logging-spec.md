@@ -6,7 +6,7 @@
 - Do not put module logging details in this file.
 - Each module must have its own logging file named `log-<module-name>.md`.
 - Each module logging file must follow the rules and format defined in this document.
-- Direct print / console statements are NOT allowed. Always use the shared logger utility.
+- Direct print / console statements are NOT allowed. Always use the project's shared logger utility.
 
 ### Implementation Rules
 
@@ -20,11 +20,26 @@ When to generate the log file and which step triggers it is defined in AGENTS.md
 
 ## Logger Instantiation
 
-Instantiate the logger at the top of each file using the module name:
+At the top of each file, create a logger instance scoped to that module's name.
 
-```
-logger = createLogger("MODULE")
-```
+The exact API depends on the logging library used in this project. Use whatever the project's
+shared logger utility provides. Common patterns across languages and frameworks:
+
+| Language / Framework | Typical pattern |
+|---|---|
+| Node.js (custom util) | `const logger = createLogger("MODULE")` |
+| Node.js (winston) | `const logger = winston.child({ module: "MODULE" })` |
+| NestJS | `private readonly logger = new Logger(ClassName.name)` |
+| Python | `logger = logging.getLogger("MODULE")` |
+| Go (slog) | `logger := slog.With("module", "MODULE")` |
+| Go (zap) | `logger := zap.L().With(zap.String("module", "MODULE"))` |
+| Laravel | `Log::channel("MODULE")` or tagged via context |
+| Spring Boot | `private static final Logger log = LoggerFactory.getLogger(ClassName.class)` |
+
+If this project uses a shared logger utility, document its instantiation pattern here
+and remove the examples above.
+
+The module name passed to the logger must match the Module Naming Convention table below.
 
 ---
 
@@ -45,11 +60,13 @@ logs/inventory_2026-06-12_10-23-01.log
 logs/payment_2026-06-12_10-23-01.log
 ```
 
-The timestamp is captured once at application startup and shared across all modules for that session, so all log files from the same run share the same timestamp.
+The timestamp is captured once at application startup and shared across all modules for that session,
+so all log files from the same run share the same timestamp.
 
 The `logs/` directory must be created automatically at application startup if it does not exist.
 Log files must be appended to within a session, never overwritten.
-The shared logger utility is responsible for handling file writes — individual modules do not write to files directly.
+The shared logger utility is responsible for handling file writes — individual modules do not write
+to files directly.
 
 ---
 
@@ -100,7 +117,8 @@ Every log message must follow this pattern:
 | `failed: <reason>` | error or exception occurred |
 | `warning: <reason>` | unexpected but non-fatal state |
 
-This means every log line is self-describing. Reading the log alone tells you which module, which operation, and what happened at that point — without needing to read the source code.
+This means every log line is self-describing. Reading the log alone tells you which module,
+which operation, and what happened at that point — without needing to read the source code.
 
 ---
 
@@ -134,6 +152,18 @@ Add new module names to this list as they are created.
 | `warn` | Unexpected but non-fatal — retry, fallback, rejected business rule |
 | `error` | Failures that need attention — exceptions, rollbacks, external call errors |
 | `debug` | Development only — gated by env flag, never on by default in production |
+
+The exact level names used in code depend on the logging library:
+
+| Canonical level | Node/Winston | Python | Go (slog/zap) | Laravel | Spring |
+|---|---|---|---|---|---|
+| `info` | `.info()` | `.info()` | `.Info()` | `Log::info()` | `.info()` |
+| `warn` | `.warn()` | `.warning()` | `.Warn()` | `Log::warning()` | `.warn()` |
+| `error` | `.error()` | `.error()` | `.Error()` | `Log::error()` | `.error()` |
+| `debug` | `.debug()` | `.debug()` | `.Debug()` | `Log::debug()` | `.debug()` |
+
+Use the method name that matches your library. The canonical level name is used in log output
+and in this document — the code method name follows the library.
 
 ---
 
