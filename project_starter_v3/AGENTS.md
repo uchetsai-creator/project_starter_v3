@@ -63,8 +63,10 @@ Read and follow code-quality-check.md. Do not proceed to Step 2 until the check 
 Step 2 — Fill in architecture and spec documents (describe what exists):
 1. Create docs/architecture/architecture.md — describe the actual components and data flows found.
    Then run: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
-   Note: the architecture diagram is automatically injected into both `architecture/architecture.md`
-   and `codebase-map.md` by `build_pdf.py` — no extra steps needed.
+   Note: the architecture diagram is injected into `architecture/architecture.md` by `build_pdf.py`.
+   The page structure component diagram (from `codebase-map.md`) is injected into `codebase-map.md`
+   — run `python3 docs/script/component_to_html.py docs/codebase-map.md` after updating the
+   component block in codebase-map.md.
 2. Create docs/architecture/backend.md — describe the actual stack, layering, and module pattern.
    Use the real layer names from the codebase — do not assume Controller/Service/Repository.
    Then run: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
@@ -221,7 +223,8 @@ Run through every item below after every task. This is mandatory, not optional.
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 - [ ] docs/specs/api-contract.md — were endpoints added/changed, or did error codes or validation rules change? If yes, update.
 - [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
-- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md` (diagram also appears in codebase-map.md automatically)
+- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
+- [ ] docs/codebase-map.md Page Structure block — did the frontend page/screen structure change? If yes, update the component block, then regenerate: `python3 docs/script/component_to_html.py docs/codebase-map.md`
 - [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
 - [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
