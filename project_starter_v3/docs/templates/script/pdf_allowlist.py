@@ -33,11 +33,21 @@ PDF_ALLOWLIST = [
     ("specifications", "specs/permissions.md"),
     ("specifications", "specs/logging-spec.md"),
     ("specifications", "specs/research.md"),
-    # 5. Flows — how it runs (individual *-module-data-flow.md added automatically)
-    # Note: "modules/" is the default folder name from the template.
-    # If your project renamed it (e.g. "flows/"), update this path and the auto-scan
-    # patterns in build_pdf.py (find_allowed_files) to match.
+    # 5. Flows — individual *-module-data-flow.md and *-flow.md are added automatically
+    # by build_pdf.py (find_allowed_files). The index files are included but filtered
+    # to show only their index tables (see PDF_SECTION_FILTER below).
     ("flows",          "modules/module-data-flow.md"),
+    ("flows",          "modules/module-flow.md"),
     # 6. Project Status
     ("project",        "codebase-map.md"),
 ]
+
+
+# Per-file section filter: only the listed ## headings (and their content) are kept.
+# Everything else in the file is stripped before rendering.
+# Key: relative path from docs_dir (same as PDF_ALLOWLIST).
+# Value: list of exact ## heading strings to keep.
+PDF_SECTION_FILTER = {
+    "modules/module-data-flow.md": ["## Module Flow Files"],
+    "modules/module-flow.md":      ["## Flow Files"],
+}
