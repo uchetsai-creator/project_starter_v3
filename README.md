@@ -189,14 +189,24 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 
 | Script | Input | Diagram type | Where it's embedded |
 |---|---|---|---|
-| `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md` |
+| `architecture_to_html.py` | `architecture.md` (yaml block) | System architecture | `architecture/architecture.md`, `codebase-map.md` |
 | `schema_to_html.py` | Prisma / SQL file | ERD | `specs/data-model.md` |
-| `state_to_html.py` | any `.md` (state block) | State machine | `specs/data-model.md`, `business/*-object.md` |
+| `state_to_html.py` | any `.md` (one or more state blocks) | State machine | `specs/data-model.md`, `business/*-object.md` |
 | `usecase_to_html.py` | any `.md` (usecase block) | Use case | `specs/permissions.md` |
-| `activity_to_html.py` | any `.md` (activity block) | Activity flow | `business/*-process.md` |
-| `sequence_to_html.py` | any `.md` (sequence block) | Sequence | `modules/[module]/[module]-flow.md` |
-| `class_to_html.py` | any `.md` (class block) | Class structure | `modules/[module]/*-module-data-flow.md` |
+| `activity_to_html.py` | any `.md` (one or more activity blocks) | Activity flow | `business/*-process.md` |
+| `sequence_to_html.py` | any `.md` (one or more sequence blocks) | Sequence | `modules/[module]/[module]-flow.md` |
+| `class_to_html.py` | any `.md` (one or more class blocks) | Class structure | `modules/[module]/*-module-data-flow.md` |
 | `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` |
+
+> **Multiple blocks per file:** all six UML scripts support multiple diagram blocks in a
+> single `.md` file. Each block generates its own HTML + SVG pair, named by its `title:`
+> slug (e.g. `data-model-workorder-status-state.html`). A file with a single block keeps
+> the original naming behaviour.
+
+> **Diagram placement markers:** to control where a diagram appears in the PDF, add
+> `<!-- diagram: KEY -->` at the desired location in the target document (where `KEY` is
+> the HTML filename without extension and suffix, e.g. `<!-- diagram: architecture -->`).
+> Without a marker, diagrams are appended to the end of their target section.
 
 ```bash
 # Examples
