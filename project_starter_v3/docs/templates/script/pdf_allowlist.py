@@ -32,7 +32,7 @@ PDF_ALLOWLIST = [
     ("specifications", "specs/api-contract.md"),
     ("specifications", "specs/permissions.md"),
     ("specifications", "specs/logging-spec.md"),
-    ("specifications", "specs/research.md"),
+    # specs/research.md — excluded until filled with actual technology decisions
     # 5. Flows — individual *-module-data-flow.md and *-flow.md are added automatically
     # by build_pdf.py (find_allowed_files). The index files are included but filtered
     # to show only their index tables (see PDF_SECTION_FILTER below).
@@ -48,6 +48,13 @@ PDF_ALLOWLIST = [
 # Key: relative path from docs_dir (same as PDF_ALLOWLIST).
 # Value: list of exact ## heading strings to keep.
 PDF_SECTION_FILTER = {
-    "modules/module-data-flow.md": ["## Module Flow Files"],
-    "modules/module-flow.md":      ["## Flow Files"],
+    "modules/module-data-flow.md":    ["## Module Flow Files"],
+    "modules/module-flow.md":         ["## Flow Files"],
+    "business/business-objects.md":   ["## Object Files", "## Relationships"],
+    "business/business-process.md":   ["## Process Files"],
+    # business-rules.md: keep real rule sections, strip BR-001/BR-002 placeholder blocks
+    # (placeholder ### headings are removed by clean_for_pdf, but keeping explicit here
+    #  in case the file has content mixed with placeholders)
+    "business/business-rules.md":     ["## Approval Rules", "## Validation Rules",
+                                       "## Notification Rules", "## Audit Rules"],
 }
