@@ -111,8 +111,7 @@ unless the task explicitly requires them.
 
 Do not scan repository.
 
-For planning rules (writing requirements, breaking down sprints/tasks), read docs/rules/planning-rules.md.
-For what each document is for and when it changes, read docs/rules/document-purposes.md — reference only, not required every task.
+For what each document is for and when it changes, read docs/document-purposes.md — reference only, not required every task.
 
 ---
 
@@ -208,6 +207,7 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
 - [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
+- [ ] docs/specs/quickstart.md — did setup steps, prerequisites, or verification steps change? If yes, update.
 - [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/modules/<module-name>/log-<module-name>.md.
 - [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
 - [ ] docs/business/[object-name]-object.md — were business entities added or changed? If yes, update, then regenerate state diagram: `python3 docs/script/state_to_html.py docs/business/<object-name>-object.md`
@@ -218,7 +218,7 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change for this module? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
 - [ ] docs/modules/module-flow.md — was a new module flow file created? If yes, add a row to the Flow Files table.
 
-For the full explanation of why each document updates on these triggers, see docs/rules/document-purposes.md.
+For the full explanation of why each document updates on these triggers, see docs/document-purposes.md.
 
 ---
 
