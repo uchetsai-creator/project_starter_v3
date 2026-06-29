@@ -29,25 +29,10 @@ except ImportError:
     print("Missing dependency. Run: pip install deep-translator --break-system-packages")
     sys.exit(1)
 
-# --- Shared with build_pdf.py ---
-PDF_ALLOWLIST = [
-    ("requirements",   "project-requirements.md"),
-    ("specifications", "specs/research.md"),
-    ("specifications", "specs/data-model.md"),
-    ("specifications", "specs/api-contract.md"),
-    ("specifications", "specs/permissions.md"),
-    ("architecture",   "architecture/architecture.md"),
-    ("architecture",   "architecture/backend.md"),
-    ("architecture",   "architecture/frontend.md"),
-    ("architecture",   "architecture/database.md"),
-    ("architecture",   "architecture/deployment.md"),
-    ("business",       "business/business-rules.md"),
-    ("business",       "business/business-objects.md"),
-    ("business",       "business/business-process.md"),
-    ("flows",          "modules/module-data-flow.md"),
-    # flows/log-*.md added dynamically below
-    ("project",        "codebase-map.md"),
-]
+# PDF_ALLOWLIST is maintained in pdf_allowlist.py — edit that file, not this one.
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _script_dir)
+from pdf_allowlist import PDF_ALLOWLIST
 
 MAX_CHARS = 4500   # Google Translate safe limit per request
 DELAY     = 0.3    # seconds between API calls to avoid rate limiting
