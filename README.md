@@ -36,7 +36,7 @@ project_starter/                     ← this repo (template only)
     │
     ├── specs/                        ← includes quickstart.md, research.md, data-model.md, etc.
     │   ├── quickstart.md            ← setup steps, prerequisites, local startup, verification
-    │   ├── research.md              ← technology decisions + alternatives considered
+    │   ├── research.md              ← technology decisions + alternatives considered (excluded from PDF until filled)
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
     │   ├── api-contract.md          ← endpoints, validation rules, error codes
     │   ├── permissions.md           ← roles, permission matrix, endpoint access control
