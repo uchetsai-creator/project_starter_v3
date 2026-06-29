@@ -38,7 +38,7 @@ project_starter/                     ← this repo (template only)
     │   ├── quickstart.md            ← setup steps, prerequisites, local startup, verification
     │   ├── research.md              ← technology decisions + alternatives considered (excluded from PDF until filled)
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
-    │   ├── api-contract.md          ← endpoints, validation rules, error codes
+    │   ├── api-contract.md          ← endpoints, events, validation rules, error codes (REST + WebSocket + GraphQL + gRPC + CLI)
     │   ├── permissions.md           ← roles, permission matrix, endpoint access control
     │   └── logging-spec.md          ← logging rules, logger instantiation, module naming
     │
@@ -211,7 +211,8 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 ```bash
 # Examples
 python3 docs/script/architecture_to_html.py docs/architecture/architecture.md
-python3 docs/script/schema_to_html.py path/to/schema.prisma
+python3 docs/script/schema_to_html.py path/to/schema.prisma -o docs/specs/schema.html
+# output must go inside docs/ so build_pdf.py can find it
 python3 docs/script/state_to_html.py docs/specs/data-model.md
 python3 docs/script/state_to_html.py docs/business/order-object.md
 python3 docs/script/usecase_to_html.py docs/specs/permissions.md
