@@ -23,18 +23,21 @@ Update when:
 * Indexes are added or removed
 
 After updating, regenerate both diagrams:
-* ERD: `python3 docs/script/schema_to_html.py <schema file>`
+* ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
+  (output must go inside docs/ so build_pdf.py can find it)
 * State diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 
 ### api-contract.md
 Purpose:
-Describes the full specification for every API endpoint.
-Default format assumes REST. If the project uses GraphQL, gRPC, WebSocket, or CLI,
-replace the document structure to match that protocol.
+Describes the full specification for every API endpoint and real-time event.
+Default format assumes REST as the primary protocol. If the project also uses
+WebSocket, Socket.IO, GraphQL, gRPC, or CLI — add a section for each protocol.
+Do not omit a protocol because it was not in the original template.
 
 Update when:
 * New endpoints are added
-* Request/response format changes
+* New WebSocket / Socket.IO events are added or changed
+* Request/response/payload format changes
 * Error codes are added
 * Validation rules change
 
