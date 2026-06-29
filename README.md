@@ -92,6 +92,8 @@ placeholders as it goes:
 new_project/
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
+├── code-quality-check.md
+├── document-purposes.md
 └── docs/
     ├── project-requirements.md
     ├── project-plan.md
