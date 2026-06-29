@@ -1,5 +1,9 @@
 # Project Starter
 
+> **Repo structure note:** This repo should be cloned so that `AGENTS.md` sits at the
+> root — i.e. `project_starter/AGENTS.md`, not `project_starter/project_starter/AGENTS.md`.
+> If you see a doubled folder after cloning, move the contents up one level.
+
 A documentation-first template for AI-assisted development. Define what you're building before
 an AI agent (Claude Code, etc.) starts writing code — then keep every doc in sync automatically
 as work progresses.
@@ -30,7 +34,8 @@ project_starter/                     ← this repo (template only)
     ├── changelog.md                 ← completed task history
     ├── codebase-map.md              ← package vs. custom code, by layer; includes project tree
     │
-    ├── specs/
+    ├── specs/                        ← includes quickstart.md, research.md, data-model.md, etc.
+    │   ├── quickstart.md            ← setup steps, prerequisites, local startup, verification
     │   ├── research.md              ← technology decisions + alternatives considered
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
     │   ├── api-contract.md          ← endpoints, validation rules, error codes
@@ -70,6 +75,11 @@ project_starter/                     ← this repo (template only)
 
 When a new project starts, `templates/` is copied in and becomes `docs/` — see
 [Project Initialization](#project-initialization) below.
+
+> **Note on file naming:** template files in this repo do not carry version suffixes
+> (e.g. `module-data-flow.md`, not `module-data-flow-v2.md`). Version history is tracked
+> in `CHANGELOG.md` at the repo root. When copying templates into a new project's `docs/`,
+> use the base filename without any suffix.
 
 ---
 
@@ -266,8 +276,7 @@ are auto-scanned and do not need to be added manually.
 - **Single PDF allowlist**: `pdf_allowlist.py` is the only file to edit when adding documents
   to the PDF. Both `build_pdf.py` and `translate_docs.py` import from it.
 - **Task granularity**: each task should be roughly half a day to one day of work, and
-  independently completable as a single Current Task — see `docs/rules/planning-rules.md`
-  (embedded in `AGENTS.md`).
+  independently completable as a single Current Task — planning rules are defined directly in `AGENTS.md`.
 - **Package First**: prefer an existing package, then an existing utility, then framework
   convention, and only write custom code for business logic, domain rules, data mapping, or
   system integration.
