@@ -3,6 +3,20 @@
 <!--
   Describes the full specification for every API endpoint.
   Each endpoint corresponds to a functional requirement in project-requirements.md.
+
+  Protocol note:
+  This template assumes REST over HTTP. If your project uses a different protocol,
+  replace the structure of this document to match:
+
+    GraphQL   — document each Query and Mutation: input types, return types, errors
+    gRPC      — document each RPC method: request message, response message, error codes
+    WebSocket — document each message type: direction (client→server / server→client),
+                payload schema, and error handling
+    CLI       — document each command: flags, arguments, output format, exit codes
+
+  The sections below (Overview table, per-endpoint blocks, Error Response Format,
+  Error Code Catalogue) do not need to be kept if they don't fit your protocol.
+  Keep whatever structure best describes how callers interact with your system.
 -->
 
 **Base URL:** `[e.g., /api/v1]`
