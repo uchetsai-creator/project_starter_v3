@@ -66,6 +66,17 @@ Update when:
 This file is the rule definition only — do not add module-specific logging content here.
 Module-specific log points live in docs/modules/[module]/log-[module].md.
 
+### specs/quickstart.md
+Purpose:
+Step-by-step guide for setting up and running the project locally.
+Covers prerequisites, environment variables, startup commands, and verification steps.
+
+Update when:
+* Setup steps change
+* New prerequisites are added
+* Verification steps change
+* Environment variable requirements change
+
 ---
 
 ## Architecture (docs/architecture/)
