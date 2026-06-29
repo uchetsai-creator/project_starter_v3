@@ -40,12 +40,12 @@ _script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _script_dir)
 from pdf_allowlist import PDF_ALLOWLIST
 
-# Maps diagram key (HTML filename without extension) → the one doc it should be injected into.
-# The diagram appears exactly once, in its home document.
+# Maps diagram key (HTML filename without extension) → target doc(s) where it should be injected.
+# Value can be a str (single doc) or list of str (inject into multiple docs).
 # For *-module-data-flow-class diagrams, the target is resolved dynamically in inject_diagrams.
 DIAGRAM_TARGETS = {
     # Original two
-    "architecture":           "architecture/architecture.md",
+
     "schema":                 "specs/data-model.md",
     # State diagrams
     "data-model-state":       "specs/data-model.md",
@@ -58,6 +58,9 @@ DIAGRAM_TARGETS = {
     "backend-component":      "architecture/backend.md",
     "frontend-component":     "architecture/frontend.md",
     # activity/sequence/*-class are matched dynamically in inject_diagrams
+    # A diagram key can map to a single doc (str) or multiple docs (list of str).
+    # When a list is given, the diagram is injected into every listed document.
+    "architecture": ["architecture/architecture.md", "codebase-map.md"],
 }
 
 
@@ -239,7 +242,20 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
     """
     for key, pair in html_svg_pairs.items():
         # Resolve target: fixed mapping first, then dynamic module-data-flow-class pattern
-        target = DIAGRAM_TARGETS.get(key)
+        raw_target = DIAGRAM_TARGETS.get(key)
+        # raw_target can be:
+        #   str  → inject into that one doc
+        #   list → inject into each listed doc (diagram appears in multiple sections)
+        #   None → resolved dynamically below
+        if isinstance(raw_target, list):
+            # Only inject into the current doc if it's one of the listed targets
+            if rel not in raw_target:
+                continue
+            target = rel
+        elif raw_target is not None:
+            target = raw_target
+        else:
+            target = None
         if target is None:
             # Dynamic: order-module-data-flow-class → modules/order/order-module-data-flow.md
             m = re.match(r'^(.+)-class$', key)
@@ -312,7 +328,13 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
                 f">\n"
                 f"> 🔗 [{strings['diagram_link']}]({html_rel})\n\n"
             )
-        md_text += block
+        # If the doc contains a placement marker <!-- diagram: KEY -->, insert there.
+        # Otherwise append to end of document.
+        marker = f'<!-- diagram: {key} -->'
+        if marker in md_text:
+            md_text = md_text.replace(marker, block, 1)
+        else:
+            md_text += block
 
     return md_text
 
