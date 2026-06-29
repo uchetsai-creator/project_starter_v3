@@ -1,13 +1,19 @@
 # Codebase Map
 
 <!--
-  Location: templates/codebase-map.md
   Tracks which layer each file belongs to, and whether it is package usage or custom logic.
   Update incrementally after each task is completed.
   Do not scan the entire repository.
 
   Type must be: Package / Custom
-  Layer must be: DB / BE / FE / MOD
+  Layer must be: DB / BE / FE / MOD / JOB
+
+  Layer definitions:
+    DB   — schema files, migrations, seed scripts
+    BE   — backend application code (controller, service, repository, middleware, etc.)
+    FE   — frontend application code (page, component, hook, store, etc.)
+    MOD  — cross-layer shared logic (state machine, data mapper, shared utility used by multiple layers)
+    JOB  — background jobs, queue consumers, scheduled tasks, event handlers (not part of request/response cycle)
 
   Custom code should only appear in the following contexts
   (per the Package First principle in AGENTS.md):
@@ -20,34 +26,71 @@
   flag it for review — it may be replaceable with a package.
 -->
 
+---
+
 ## Project Structure
 
 <!--
-  Fill in your actual project file/folder structure below.
-  Include both source code and template/doc folders.
+  Show the full project root — not just the source folder.
+  Include docs/, config files, and any other top-level folders.
+  Annotate every meaningful folder and file with ← description.
+
+  For the source folder, annotate each module with its documentation status:
+    ✅  fully documented (module-data-flow.md exists)
+    ❌  not yet documented
+    —   shared utility / infrastructure (does not need a flow file)
+
+  To auto-generate and update this section, run:
+    python3 docs/script/scan_codebase.py <src_dir> --update docs/codebase-map.md
+
+  Re-run after every module is completed to keep coverage status current.
 -->
 
 ```
-project-root/
-├── templates/                        ← planning & spec docs
-│   ├── codebase-map.md
-│   └── ...
+[project-root]/
+├── docs/                             ← planning, specs, architecture docs
+│   ├── architecture/                 ← system structure docs
+│   ├── business/                     ← business process and object docs
+│   ├── modules/                      ← per-module flow and log files
+│   ├── specs/                        ← data model, API contract, permissions, logging
+│   └── script/                       ← diagram generators, PDF builder, scan tool
 │
-├── [your-source-folder]/             ← e.g., src/ app/ backend/ frontend/
-│   ├── [module-a]/
-│   │   ├── [file]
-│   │   └── [file]
-│   └── [module-b]/
-│       ├── [file]
-│       └── [file]
+├── [src]/                            ← application source code
+│   ├── [module-a]/        ✅         ← [short description, e.g., order management]
+│   ├── [module-b]/        ❌         ← [short description]
+│   ├── [jobs]/            ✅         ← [background jobs, queue consumers]
+│   └── [lib]/             —          ← [shared utilities, no flow file needed]
 │
-├── [config files]                    ← e.g., package.json, prisma/, docker-compose.yml
+├── [prisma/ or migrations/]          ← database schema and migrations
+├── [docker-compose.yml]              ← local infrastructure services
+├── [package.json / go.mod / etc.]    ← dependency manifest
 └── ...
 ```
 
 ---
 
+## Coverage Summary
+
+<!--
+  Updated by scan_codebase.py --coverage, or manually after each module is documented.
+  This table gives a quick view of what is and is not yet documented.
+-->
+
+| Module / Folder | Type | Status | Flow file |
+|---|---|---|---|
+| `[src/module-a]` | Feature | ✅ Documented | `docs/modules/module-a/module-a-module-data-flow.md` |
+| `[src/jobs/order-consumer]` | Background Job | ✅ Documented | `docs/modules/order-consumer/order-consumer-module-data-flow.md` |
+| `[src/module-b]` | Feature | ❌ Not documented | — |
+| `[src/lib]` | Shared Utility | — Not required | — |
+
+---
+
 ## [Feature / Module Name]
+
+<!--
+  Module type: Feature | Background Job | Shared Utility | Infrastructure
+  Add one section per module as tasks are completed.
+-->
 
 | File | Layer | Type | Description |
 |---|---|---|---|
@@ -60,12 +103,17 @@ project-root/
 
 ---
 
-## [Feature / Module Name]
+## [Background Job / Queue Consumer Name]
+
+<!--
+  Module type: Background Job
+  Use JOB layer for all files that are not part of the HTTP request/response cycle.
+-->
 
 | File | Layer | Type | Description |
 |---|---|---|---|
-| `[file path]` | DB | Custom | |
-| `[file path]` | BE | Custom | |
-| `[file path]` | FE | Custom | |
+| `[file path]` | JOB | Custom | [e.g., Order event consumer — listens for OrderCreated] |
+| `[file path]` | JOB | Package | [e.g., BullMQ worker setup] |
+| `[file path]` | BE | Custom | [e.g., Order service called by the consumer] |
 
 ---
