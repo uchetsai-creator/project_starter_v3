@@ -35,6 +35,11 @@ import markdown
 from weasyprint import HTML, CSS
 import cairosvg
 
+# PDF_ALLOWLIST is maintained in pdf_allowlist.py — edit that file, not this one.
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _script_dir)
+from pdf_allowlist import PDF_ALLOWLIST
+
 # Maps diagram key (HTML filename without extension) → the one doc it should be injected into.
 # The diagram appears exactly once, in its home document.
 # For *-module-data-flow-class diagrams, the target is resolved dynamically in inject_diagrams.
@@ -55,34 +60,7 @@ DIAGRAM_TARGETS = {
     # activity/sequence/*-class are matched dynamically in inject_diagrams
 }
 
-# Explicit allowlist — the only files that appear in the PDF, in display order.
-# Each entry is (section_key, relative_path_from_docs_dir).
-# section_key maps to a translated label via SECTION_LABELS below.
-# To add a new permanent deliverable doc, append an entry here.
-PDF_ALLOWLIST = [
-    # 1. Business — understand why before what
-    ("business",       "business/business-process.md"),
-    ("business",       "business/business-objects.md"),   # index
-    ("business",       "business/business-rules.md"),
-    # 2. Requirements — what to build
-    ("requirements",   "project-requirements.md"),
-    # 3. Architecture — how it is structured
-    ("architecture",   "architecture/architecture.md"),
-    ("architecture",   "architecture/backend.md"),
-    ("architecture",   "architecture/frontend.md"),
-    ("architecture",   "architecture/database.md"),
-    ("architecture",   "architecture/deployment.md"),
-    # 4. Specifications — how it is implemented
-    ("specifications", "specs/data-model.md"),
-    ("specifications", "specs/api-contract.md"),
-    ("specifications", "specs/permissions.md"),
-    ("specifications", "specs/logging-spec.md"),
-    ("specifications", "specs/research.md"),
-    # 5. Flows — how it runs (individual *-module-data-flow.md added automatically)
-    ("flows",          "modules/module-data-flow.md"),
-    # 6. Project Status
-    ("project",        "codebase-map.md"),
-]
+
 
 # UI strings for each supported language.
 # Add a new language by copying the "en" block with a new key.
