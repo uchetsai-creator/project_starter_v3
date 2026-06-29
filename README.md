@@ -18,28 +18,28 @@ scaffolding under `templates/`. Copy `templates/` into a new project's `docs/` f
    following the checklist in `AGENTS.md`.
 
 ```
-project_starter_v3/                  ← this repo (template only)
+project_starter/                     ← this repo (template only)
 ├── AGENTS.md
 ├── debug-instrumentation-rules.md
 ├── code-quality-check.md            ← code review checklist for retrofitting existing projects
 ├── document-purposes.md             ← reference for what each document is for and when it changes
 └── templates/
     ├── project-requirements.md      ← project scope, goals, edge cases, acceptance criteria
-    ├── project-plan.md              ← sprint/task breakdown (DB → BE → FE per feature)
+    ├── project-plan.md              ← sprint/task breakdown per feature
     ├── current-state.md             ← the active task
     ├── changelog.md                 ← completed task history
-    ├── codebase-map.md              ← package vs. custom code, by layer
+    ├── codebase-map.md              ← package vs. custom code, by layer; includes project tree
     │
     ├── specs/
     │   ├── research.md              ← technology decisions + alternatives considered
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
     │   ├── api-contract.md          ← endpoints, validation rules, error codes
-    │   ├── permissions.md           ← roles, RBAC matrix, endpoint access control
-    │   └── logging-spec.md          ← logging rules + module naming convention
+    │   ├── permissions.md           ← roles, permission matrix, endpoint access control
+    │   └── logging-spec.md          ← logging rules, logger instantiation, module naming
     │
     ├── architecture/
     │   ├── architecture.md          ← components, data flow, structured YAML for diagram
-    │   ├── backend.md               ← backend stack, layering, module pattern
+    │   ├── backend.md               ← backend stack, layering, module pattern (architecture-agnostic)
     │   ├── frontend.md              ← frontend stack, page structure, component strategy
     │   ├── database.md              ← entities/relationships (conceptual level)
     │   └── deployment.md            ← services, env vars, startup flow, verification steps
@@ -50,7 +50,7 @@ project_starter_v3/                  ← this repo (template only)
     │   └── business-rules.md        ← approval/validation/notification/audit rules
     │
     ├── modules/
-    │   ├── module-data-flow.md      ← index + rules for code-level flow files (per module)
+    │   ├── module-data-flow.md      ← index + rules for module flow files (Feature / Background Job / Shared Utility)
     │   └── module-flow.md           ← index + rules for cross-module sequence files (per module)
     │
     └── script/
@@ -62,8 +62,10 @@ project_starter_v3/                  ← this repo (template only)
         ├── usecase_to_html.py       ← use case diagram block → interactive HTML + static SVG
         ├── activity_to_html.py      ← activity diagram block → interactive HTML + static SVG
         ├── component_to_html.py     ← component diagram block → interactive HTML + static SVG
+        ├── scan_codebase.py         ← scans src/ and reports which modules are undocumented
         ├── translate_docs.py        ← translate docs/ to Traditional Chinese → docs-zh/
-        └── build_pdf.py             ← merges all of docs/ into one PDF, with diagrams embedded
+        ├── build_pdf.py             ← merges all of docs/ into one PDF, with diagrams embedded
+        └── pdf_allowlist.py         ← single source of truth for which files appear in the PDF
 ```
 
 When a new project starts, `templates/` is copied in and becomes `docs/` — see
@@ -96,8 +98,8 @@ new_project/
     │   └── business-rules.md
     ├── modules/
     │   ├── module-data-flow.md            ← index file
-    │   ├── module-flow.md                 ← shared process flow template
-    │   └── [module-name]/                 ← one subfolder per module
+    │   ├── module-flow.md                 ← index file
+    │   └── [module-name]/                 ← one subfolder per module (Feature or Background Job)
     │       ├── [module]-module-data-flow.md  ← auto-included in PDF
     │       └── log-[module].md               ← not in PDF, dev reference only
     └── script/
@@ -121,7 +123,7 @@ After finishing a task, it works through a mandatory checklist (see `AGENTS.md` 
 `Document Update Checklist`) — checking whether each spec/architecture/business doc needs
 updating based on what just changed.
 
-When a task finishes **all** DB/BE/FE work for a module, three more things happen automatically:
+When a task finishes **all** work for a module, three more things happen automatically:
 
 - Logger calls are inserted into the module's code (per `logging-spec.md`), and
   `docs/modules/[module]/log-[module].md` is created/updated
@@ -136,22 +138,41 @@ If a project already has code but no documentation, use the retrofit flow in `AG
 (`If retrofitting an existing project`). The flow has five steps:
 
 1. **Read the codebase** — entry point, schema, one complete module
-2. **Code Quality Check** — the agent runs `code-quality-check.md` and produces a report
+2. **Run the module inventory scan** — `scan_codebase.py` lists every source folder and flags which
+   are undocumented. You confirm the list before any documentation is written, so nothing gets missed
+3. **Code Quality Check** — the agent runs `code-quality-check.md` and produces a report
    covering layering, Package First violations, naming, schema design, security, and error
    handling. You decide whether to fix issues first or document the codebase as-is
-3. **Fill in architecture and spec documents** — describe what actually exists, not what should exist
-4. **Fill in module flow files** — one module at a time, using real function names and file paths
-5. **Fill in project status** — reconstruct requirements, mark existing modules as completed in
+4. **Fill in architecture and spec documents** — describe what actually exists, not what should exist.
+   Templates are architecture-agnostic — use your actual layer names, not assumed patterns
+5. **Fill in module flow files** — one module at a time. Each module is classified as
+   Feature, Background Job, or Shared Utility — each type has its own flow format
+6. **Fill in project status** — reconstruct requirements, mark existing modules as completed in
    project-plan.md, generate the PDF
 
 `code-quality-check.md` can also be used independently at any time as a standalone code review checklist.
 
 ---
 
+## Module types
+
+`module-data-flow.md` supports three module types, each with its own flow format:
+
+| Type | Description | Entry point |
+|---|---|---|
+| **Feature** | Handles requests or commands — HTTP, GraphQL, CLI, RPC, WebSocket, etc. | Request / command |
+| **Background Job** | Runs outside the request cycle — queue consumer, cron, event handler, worker | Queue message / schedule / event |
+| **Shared Utility** | No entry point — called by other modules | None (class block only) |
+
+The flow format does not prescribe layer names. Use whatever names your architecture actually has
+(Controller, Handler, UseCase, Resolver, Model, etc.).
+
+---
+
 ## Diagrams
 
 Eight scripts turn structured Markdown blocks into diagrams — each outputs both an **interactive HTML**
-(drag, zoom, click) and a **static SVG** (for PDF embedding). All six UML scripts automatically
+(drag, zoom, click) and a **static SVG** (for PDF embedding). All UML scripts automatically
 append a type suffix to the output filename to avoid collisions (e.g. `data-model-state.html`).
 
 | Script | Input | Diagram type | Where it's embedded |
@@ -180,10 +201,28 @@ python3 docs/script/component_to_html.py docs/architecture/backend.md
 
 ---
 
+## Module inventory scan
+
+Before documenting an existing codebase, run the inventory scan to get an objective view of
+what exists and what is already documented:
+
+```bash
+# Show tree view + coverage report
+python3 docs/script/scan_codebase.py src
+
+# Update the Project Structure and Coverage Summary sections in codebase-map.md automatically
+python3 docs/script/scan_codebase.py src --update docs/codebase-map.md
+```
+
+The scan detects folder names to classify folders as Feature, Background Job, or
+Shared/Infrastructure. Re-run at the end of Step 3 (retrofit) to confirm full coverage.
+
+---
+
 ## Generating the merged PDF
 
-Combines every real document under `docs/` (per the explicit allowlist in `build_pdf.py`) into a
-single PDF — table of contents, page numbers, and architecture/ERD diagrams embedded as images
+Combines every real document under `docs/` (per the allowlist in `pdf_allowlist.py`) into a
+single PDF — table of contents, page numbers, and diagrams embedded as images
 with a clickable link to the original interactive HTML.
 
 ```bash
@@ -205,8 +244,8 @@ reads exactly like `docs/`.
 > Translation quality is good for headings and short sentences. Technical jargon and proper nouns
 > may need manual review after translation.
 
-To add a new document to the PDF, add it to `PDF_ALLOWLIST` in **both** `build_pdf.py` and
-`translate_docs.py` — they each maintain their own copy of the list. Note that
+To add a new document to the PDF, add it to **`docs/script/pdf_allowlist.py`** only —
+`build_pdf.py` and `translate_docs.py` both import from it automatically. Note that
 `business/*-process.md`, `business/*-object.md`, and `modules/*/*-module-data-flow.md`
 are auto-scanned and do not need to be added manually.
 
@@ -216,11 +255,19 @@ are auto-scanned and do not need to be added manually.
 
 - **Templates vs. docs**: `templates/` is always blank scaffolding. Real content only ever lives
   in a project's `docs/` folder, never in this repo.
+- **Architecture-agnostic templates**: `backend.md`, `module-data-flow.md`, and `logging-spec.md`
+  do not assume any specific layering pattern or language. Use your actual layer names and
+  logger API — the templates provide structure, not prescription.
+- **Module inventory before documentation**: the retrofit flow requires running `scan_codebase.py`
+  and getting user confirmation before any documentation is written — so undocumented modules
+  are caught at the start, not discovered at the end.
+- **Three module types**: Feature (request-driven), Background Job (event/schedule-driven), and
+  Shared Utility (no entry point). Each has its own flow format in `module-data-flow.md`.
+- **Single PDF allowlist**: `pdf_allowlist.py` is the only file to edit when adding documents
+  to the PDF. Both `build_pdf.py` and `translate_docs.py` import from it.
 - **Task granularity**: each task should be roughly half a day to one day of work, and
   independently completable as a single Current Task — see `docs/rules/planning-rules.md`
   (embedded in `AGENTS.md`).
-- **Task ordering**: shared foundation first, then each feature as a vertical slice
-  (DB → BE → FE), rather than completing all DB work before moving to BE.
 - **Package First**: prefer an existing package, then an existing utility, then framework
   convention, and only write custom code for business logic, domain rules, data mapping, or
   system integration.
