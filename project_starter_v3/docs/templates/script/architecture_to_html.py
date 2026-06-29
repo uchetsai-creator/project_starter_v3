@@ -14,12 +14,17 @@ except ImportError:
     import yaml
 
 COMPONENT_COLORS = {
-    "gateway":  {"head": "#744210", "border": "#F6AD55", "badge_bg": "#FEEBC8", "badge_fg": "#744210"},
-    "service":  {"head": "#1A365D", "border": "#BEE3F8", "badge_bg": "#EBF8FF", "badge_fg": "#2B6CB0"},
-    "database": {"head": "#276749", "border": "#C6F6D5", "badge_bg": "#F0FFF4", "badge_fg": "#276749"},
-    "cache":    {"head": "#553C9A", "border": "#E9D8FD", "badge_bg": "#FAF5FF", "badge_fg": "#553C9A"},
-    "queue":    {"head": "#702459", "border": "#FED7E2", "badge_bg": "#FFF5F7", "badge_fg": "#702459"},
-    "external": {"head": "#4A5568", "border": "#E2E8F0", "badge_bg": "#F7FAFC", "badge_fg": "#4A5568"},
+    "gateway":   {"head": "#744210", "border": "#F6AD55", "badge_bg": "#FEEBC8", "badge_fg": "#744210"},
+    "service":   {"head": "#1A365D", "border": "#BEE3F8", "badge_bg": "#EBF8FF", "badge_fg": "#2B6CB0"},
+    "worker":    {"head": "#2C5282", "border": "#BEE3F8", "badge_bg": "#EBF8FF", "badge_fg": "#2C5282"},
+    "frontend":  {"head": "#285E61", "border": "#B2F5EA", "badge_bg": "#E6FFFA", "badge_fg": "#285E61"},
+    "cli":       {"head": "#1A202C", "border": "#CBD5E0", "badge_bg": "#F7FAFC", "badge_fg": "#1A202C"},
+    "database":  {"head": "#276749", "border": "#C6F6D5", "badge_bg": "#F0FFF4", "badge_fg": "#276749"},
+    "cache":     {"head": "#553C9A", "border": "#E9D8FD", "badge_bg": "#FAF5FF", "badge_fg": "#553C9A"},
+    "queue":     {"head": "#702459", "border": "#FED7E2", "badge_bg": "#FFF5F7", "badge_fg": "#702459"},
+    "storage":   {"head": "#744210", "border": "#FEEBC8", "badge_bg": "#FFFAF0", "badge_fg": "#744210"},
+    "external":  {"head": "#4A5568", "border": "#E2E8F0", "badge_bg": "#F7FAFC", "badge_fg": "#4A5568"},
+    "third-party": {"head": "#4A5568", "border": "#E2E8F0", "badge_bg": "#F7FAFC", "badge_fg": "#4A5568"},
 }
 
 PROTOCOL_COLORS = {
@@ -72,10 +77,11 @@ def parse_architecture(content):
 
 
 def compute_layout(nodes):
-    type_order = ["gateway", "service", "database", "cache", "queue", "external"]
+    type_order = ["gateway", "frontend", "cli", "service", "worker", "database", "cache", "queue", "storage", "external", "third-party"]
     grouped = {t: [] for t in type_order}
+    # unknown types fall back to "external" for layout, but keep their own color
     for name, node in nodes.items():
-        t = node["type"] if node["type"] in grouped else "external"
+        t = node["type"] if node["type"] in grouped else "external"  # unknown types grouped as external
         grouped[t].append(name)
 
     pos = {}
