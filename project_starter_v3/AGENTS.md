@@ -75,7 +75,8 @@ Step 2 — Fill in architecture and spec documents (describe what exists):
 4. Create docs/architecture/database.md — describe the actual entities and key relationships.
 5. Create docs/architecture/deployment.md — describe the actual services and startup flow.
 6. Create docs/specs/data-model.md — fill in from the actual schema file.
-   Then run: `python3 docs/script/schema_to_html.py <schema file>`
+   Then run: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
+   (output must go inside docs/ so build_pdf.py can find it)
    Then run: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 7. Create docs/specs/api-contract.md — fill in from the actual routes and controllers.
 8. Create docs/specs/permissions.md — fill in from the actual auth middleware and role logic.
@@ -219,9 +220,10 @@ Run through every item below after every task. This is mandatory, not optional.
 
 - [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update. Note: research.md is excluded from the PDF by default (pdf_allowlist.py) — uncomment its entry once it has real content.
 - [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then:
-  - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file>`
+  - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
+    (output must go inside docs/ so build_pdf.py can find it)
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
-- [ ] docs/specs/api-contract.md — were endpoints added/changed, or did error codes or validation rules change? If yes, update.
+- [ ] docs/specs/api-contract.md — were endpoints added/changed, did error codes or validation rules change, or were WebSocket/Socket.IO events / GraphQL queries or mutations / gRPC methods / CLI commands added or changed? If yes, update the relevant protocol section.
 - [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
 - [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
 - [ ] docs/codebase-map.md Page Structure block — did the frontend page/screen structure change? If yes, update the component block, then regenerate: `python3 docs/script/component_to_html.py docs/codebase-map.md`
