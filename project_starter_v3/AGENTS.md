@@ -111,7 +111,7 @@ unless the task explicitly requires them.
 
 Do not scan repository.
 
-For what each document is for and when it changes, read docs/document-purposes.md — reference only, not required every task.
+For what each document is for and when it changes, read document-purposes.md — reference only, not required every task.
 
 ---
 
@@ -218,7 +218,7 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change for this module? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
 - [ ] docs/modules/module-flow.md — was a new module flow file created? If yes, add a row to the Flow Files table.
 
-For the full explanation of why each document updates on these triggers, see docs/document-purposes.md.
+For the full explanation of why each document updates on these triggers, see document-purposes.md.
 
 ---
 
