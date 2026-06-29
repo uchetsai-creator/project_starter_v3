@@ -47,8 +47,12 @@ import sys, os, re
 # ── Parser ───────────────────────────────────────────────────────────────────
 
 def parse_activity(content):
-    block_match = re.search(r'```activity\s*(.*?)```', content, re.DOTALL)
-    raw = block_match.group(1) if block_match else content
+    # Accept either a full markdown file or a raw block string
+    if '```activity' in content:
+        _m = re.search(r'```activity\s*(.*?)```', content, re.DOTALL)
+        raw = _m.group(1) if _m else content
+    else:
+        raw = content
 
     title = ""
     nodes = []   # list of node dicts
@@ -296,24 +300,59 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python3 activity_to_html.py <input.md> [-o output.html]"); sys.exit(1)
     input_path = sys.argv[1]
-    output_path = sys.argv[3] if len(sys.argv) > 3 and sys.argv[2] == '-o' else None
+    base_output = sys.argv[3] if len(sys.argv) > 3 and sys.argv[2] == '-o' else None
+
     if not os.path.exists(input_path):
         print(f"File not found: {input_path}"); sys.exit(1)
+
     with open(input_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    title, nodes, edges = parse_activity(content)
-    if not nodes:
-        print("No nodes found. Check your ```activity block."); sys.exit(1)
-    svg = build_svg(title, nodes, edges)
-    if not output_path:
-        output_path = os.path.splitext(input_path)[0] + '-activity.html'
-    svg_path = os.path.splitext(output_path)[0] + '.svg'
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(HTML_TEMPLATE.replace('{title}', title or 'Activity Diagram').replace('{svg_content}', svg))
-    with open(svg_path, 'w', encoding='utf-8') as f:
-        f.write(svg)
-    print(f"Generated: {output_path} ({len(nodes)} nodes, {len(edges)} edges)")
-    print(f"Generated: {svg_path} (static, for PDF embedding)")
+
+    # Find ALL ```activity blocks in the file
+    blocks = list(re.finditer(r'```activity\s*(.*?)```', content, re.DOTALL))
+    if not blocks:
+        print("No ```activity block found. Check your syntax."); sys.exit(1)
+
+    # Strip existing suffix from base stem to avoid doubling (e.g. file-activity-activity.html)
+    base_stem = os.path.splitext(base_output or input_path)[0]
+    if base_stem.endswith('-activity'):
+        base_stem = base_stem[:-len('-activity')]
+
+    generated = 0
+
+    for idx, match in enumerate(blocks):
+        result = parse_activity(match.group(1))
+        title  = result[0] or ""
+
+        # Single block → keep original naming; multiple → append title slug or index
+        if len(blocks) == 1:
+            out_stem = base_stem
+        else:
+            slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-') if title else str(idx + 1)
+            out_stem = base_stem + f'-{slug}'
+
+        output_path = out_stem + '-activity.html'
+        svg_path    = out_stem + '-activity.svg'
+
+        svg        = build_svg(*result)
+        html_title = title or 'Activity Diagram'
+
+        _write_html = globals().get('build_html', None)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            if _write_html:
+                f.write(_write_html(html_title, svg))
+            else:
+                f.write(HTML_TEMPLATE.replace('{title}', html_title).replace('{svg_content}', svg))
+        with open(svg_path, 'w', encoding='utf-8') as f:
+            f.write(svg)
+
+        print(f"Generated: {output_path}")
+        print(f"Generated: {svg_path} (static, for PDF embedding)")
+        generated += 1
+
+    if generated > 1:
+        print(f"\nTotal: {generated} diagrams from {os.path.basename(input_path)}")
+
 
 if __name__ == '__main__':
     main()
