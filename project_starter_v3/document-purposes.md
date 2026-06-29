@@ -15,12 +15,6 @@ Update when:
 * NEEDS CLARIFICATION items are resolved
 * Architecture decisions change
 
-### quickstart.md
-Update when:
-* Setup steps change
-* New verification steps are added
-* Environment requirements change
-
 ### data-model.md
 Update when:
 * Schema changes
@@ -33,6 +27,11 @@ After updating, regenerate both diagrams:
 * State diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 
 ### api-contract.md
+Purpose:
+Describes the full specification for every API endpoint.
+Default format assumes REST. If the project uses GraphQL, gRPC, WebSocket, or CLI,
+replace the document structure to match that protocol.
+
 Update when:
 * New endpoints are added
 * Request/response format changes
@@ -55,14 +54,17 @@ functions across all modules in one diagram, not per resource or per module.
 ### logging-spec.md
 Purpose:
 Define logging rules, format, and module naming conventions.
+Logger instantiation pattern is documented here in a language/framework-agnostic way —
+use whatever the project's logging library provides.
 All modules must follow this spec.
 
 Update when:
 * New modules are added (add one line to the Module Naming Convention table)
 * Log format changes
+* Logger instantiation pattern changes
 
 This file is the rule definition only — do not add module-specific logging content here.
-Module-specific log points live in docs/flows/log-<module-name>.md.
+Module-specific log points live in docs/modules/[module]/log-[module].md.
 
 ---
 
@@ -72,6 +74,7 @@ Module-specific log points live in docs/flows/log-<module-name>.md.
 Purpose:
 Describe system component overview and data flow.
 Holds the structured YAML block used by architecture_to_html.py to generate the diagram.
+Component type is a free-form label — use whatever best describes the component's role.
 
 Update when:
 * New components are added
@@ -84,6 +87,7 @@ After updating, regenerate diagram:
 ### backend.md
 Purpose:
 Describe backend structure — stack, layering, layer responsibilities, module pattern.
+Use the actual layer names from the codebase — do not assume Controller/Service/Repository.
 Includes a component block for the backend module structure diagram.
 
 Update when:
@@ -127,6 +131,7 @@ Update when:
 ### module-data-flow.md
 Purpose:
 Index and rule definition for module-level code flows. Sits at `docs/modules/module-data-flow.md`.
+Defines three module types — Feature, Background Job, Shared Utility — each with its own flow format.
 Each module gets its own subfolder (`docs/modules/[module]/`) with its own flow file.
 
 Update when:
@@ -135,7 +140,10 @@ Update when:
 ### [module]-module-data-flow.md
 Purpose:
 Track code-level execution flow (function names, file paths) for a specific module.
-Also includes a class block describing the module's class/service structure.
+Declare the module type at the top: Feature / Background Job / Shared Utility.
+Flow format follows the matching format defined in module-data-flow.md — do not assume
+Controller/Service/Repository; use the real layer names from the codebase.
+Also includes a class block describing the module's structure.
 
 Location: `docs/modules/[module]/[module]-module-data-flow.md`
 Examples: `docs/modules/order/order-module-data-flow.md`
@@ -144,7 +152,7 @@ Files matching this pattern are automatically included in the PDF.
 
 Update when:
 * Function names or file paths change for this module
-* A new CRUD operation is implemented
+* A new operation is implemented
 * The module's class structure changes
 
 After updating, regenerate class diagram:
@@ -176,7 +184,7 @@ Update when:
 After updating, regenerate sequence diagram:
 `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
 
-### log-<module-name>.md
+### log-[module].md
 Purpose:
 Track every log point in a module, in call order. One file per module.
 Not included in the PDF — this is an implementation detail reference for developers.
@@ -261,13 +269,40 @@ Completed task history. Current Task moves here once finished.
 
 ### codebase-map.md
 Purpose:
-Track which files are package usage vs custom logic, classified by layer (DB/BE/FE/MOD).
+Track which files are package usage vs custom logic, classified by layer (DB/BE/FE/MOD/JOB).
+Includes a project tree (from project root) with documentation coverage status per module.
 Used to verify the Package First principle is being followed.
 
 Update when:
-* A task is completed — add the files touched in that task.
+* A task is completed — add the files touched in that task
+* Re-run `python3 docs/script/scan_codebase.py <src_dir> --update docs/codebase-map.md`
+  to refresh the tree view and coverage summary
 
 Do not scan the entire repository to regenerate this file. Update incrementally, one task at a time.
+
+---
+
+## Scripts (docs/script/)
+
+### pdf_allowlist.py
+Purpose:
+Single source of truth for which files appear in the PDF, in what order, and under which section.
+Both `build_pdf.py` and `translate_docs.py` import from this file.
+
+Update when:
+* A new permanent document is added to `docs/` and should appear in the PDF
+
+Do not edit `build_pdf.py` or `translate_docs.py` for this purpose — edit only this file.
+
+### scan_codebase.py
+Purpose:
+Scans the source directory and reports which modules are documented, undocumented,
+or shared/infrastructure. Outputs a project tree (from project root) with `←` annotations
+and documentation coverage icons.
+
+Run at the start of a retrofit (Step 1b) to inventory all modules before documentation begins.
+Run again after Step 3 to confirm full coverage.
+Run with `--update docs/codebase-map.md` to write the tree and coverage table into codebase-map.md.
 
 ---
 
