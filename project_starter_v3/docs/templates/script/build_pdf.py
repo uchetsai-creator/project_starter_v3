@@ -38,7 +38,7 @@ import cairosvg
 # PDF_ALLOWLIST is maintained in pdf_allowlist.py — edit that file, not this one.
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _script_dir)
-from pdf_allowlist import PDF_ALLOWLIST
+from pdf_allowlist import PDF_ALLOWLIST, PDF_SECTION_FILTER
 
 # Maps diagram key (HTML filename without extension) → target doc(s) where it should be injected.
 # Value can be a str (single doc) or list of str (inject into multiple docs).
@@ -338,6 +338,95 @@ def inject_diagrams(md_text, rel, docs_dir, html_svg_pairs, png_cache_dir, strin
     return md_text
 
 
+def filter_sections(md_text, keep_headings):
+    """
+    Keep only the specified ## sections (and their content) from a markdown file.
+    Everything else — including the file's H1 title and any other sections — is removed.
+    keep_headings: list of exact heading strings, e.g. ["## Module Flow Files"]
+    """
+    lines = md_text.splitlines(keepends=True)
+    result = []
+    inside_kept = False
+    current_level = None
+
+    for line in lines:
+        stripped = line.rstrip()
+
+        # Detect headings
+        heading_match = re.match(r'^(#{1,6})\s+(.+)$', stripped)
+        if heading_match:
+            level = len(heading_match.group(1))
+            full_heading = stripped
+
+            # Check if this heading is one we want to keep
+            if full_heading in keep_headings:
+                inside_kept = True
+                current_level = level
+                result.append(line)
+                continue
+
+            # If we hit a heading of same or higher level, stop keeping
+            if inside_kept and level <= current_level:
+                inside_kept = False
+                current_level = None
+            # Sub-headings inside a kept section are kept automatically
+            # (they have higher level number = lower hierarchy)
+
+        if inside_kept:
+            result.append(line)
+
+    return ''.join(result).strip()
+
+
+
+def clean_for_pdf(md_text):
+    """
+    Strip AI-instruction content from markdown before rendering to PDF.
+
+    Removes:
+    1. HTML comments <!-- ... -->
+    2. Table rows where every cell is a placeholder ([...] or empty)
+    3. Top-level sections whose heading is a placeholder (e.g. # [Process Name])
+       — these are template format-example sections, not real content
+    """
+
+    # 1. Remove HTML comments (single-line and multi-line)
+    md_text = re.sub(r'<!--.*?-->', '', md_text, flags=re.DOTALL)
+
+    # 2. Remove placeholder table rows — every cell matches [...] or is blank/dash
+    placeholder_cell = re.compile(r'^\s*\[.*?\]\s*$|^\s*—\s*$|^\s*-\s*$|^\s*$')
+
+    def is_placeholder_row(line):
+        if not line.startswith('|'):
+            return False
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        return bool(cells) and all(placeholder_cell.match(c) for c in cells)
+
+    lines = md_text.splitlines()
+    md_text = '\n'.join(line for line in lines if not is_placeholder_row(line))
+
+    # 3. Remove sections whose heading is a pure placeholder: # [...] or ## [...]
+    def remove_placeholder_sections(text):
+        pattern = re.compile(r'^(#{1,3})\s+\[.*?\]\s*$', re.MULTILINE)
+        result = []
+        pos = 0
+        for m in pattern.finditer(text):
+            result.append(text[pos:m.start()])
+            level = len(m.group(1))
+            # Skip until next heading of same or higher level
+            next_m = re.search(r'^#{1,' + str(level) + r'}\s+', text[m.end():], re.MULTILINE)
+            pos = m.end() + next_m.start() if next_m else len(text)
+        result.append(text[pos:])
+        return ''.join(result)
+
+    md_text = remove_placeholder_sections(md_text)
+
+    # Clean up excessive blank lines
+    md_text = re.sub(r'\n{3,}', '\n\n', md_text)
+
+    return md_text
+
+
 def build_merged_markdown(docs_dir, html_svg_pairs, png_cache_dir, strings):
     files = find_allowed_files(docs_dir, strings)
     if not files:
@@ -363,6 +452,10 @@ def build_merged_markdown(docs_dir, html_svg_pairs, png_cache_dir, strings):
         with open(abs_path, "r", encoding="utf-8") as f:
             content = f.read()
 
+        # Apply per-file section filter if defined
+        if rel in PDF_SECTION_FILTER:
+            content = filter_sections(content, PDF_SECTION_FILTER[rel])
+        content = clean_for_pdf(content)
         content = inject_diagrams(content, rel, docs_dir, html_svg_pairs, png_cache_dir, strings)
 
         # Use the first # H1 heading from the file as the title; fall back to filename.
