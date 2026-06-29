@@ -63,6 +63,8 @@ Read and follow code-quality-check.md. Do not proceed to Step 2 until the check 
 Step 2 — Fill in architecture and spec documents (describe what exists):
 1. Create docs/architecture/architecture.md — describe the actual components and data flows found.
    Then run: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
+   Note: the architecture diagram is automatically injected into both `architecture/architecture.md`
+   and `codebase-map.md` by `build_pdf.py` — no extra steps needed.
 2. Create docs/architecture/backend.md — describe the actual stack, layering, and module pattern.
    Use the real layer names from the codebase — do not assume Controller/Service/Repository.
    Then run: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
@@ -198,7 +200,10 @@ Run this check after every task — most of the time the answer will be "no," bu
     2. Ask: "Would you like to add debug instrumentation to this module? (follows debug-instrumentation-rules.md)"
        * If yes: follow debug-instrumentation-rules.md and instrument the module.
        * If no: continue.
-    3. Regenerate the English PDF — no need to ask, just run:
+    3. If the module flow file contains multiple sequence or class blocks, each block
+       generates its own diagram file (named by title slug). All are picked up automatically
+       by build_pdf.py — no extra configuration needed.
+    4. Regenerate the English PDF — no need to ask, just run:
        `python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
        Chinese PDF is manual only — run when requested:
        `python3 docs/script/translate_docs.py docs --out docs-zh`
@@ -216,7 +221,7 @@ Run through every item below after every task. This is mandatory, not optional.
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 - [ ] docs/specs/api-contract.md — were endpoints added/changed, or did error codes or validation rules change? If yes, update.
 - [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
-- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
+- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md` (diagram also appears in codebase-map.md automatically)
 - [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
 - [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
