@@ -30,10 +30,15 @@ Record business knowledge — constraints, policies, and rules that the system m
 
 ## Approval Rules
 
-| Action | Required approver | API / Trigger | Rejection response |
+<!--
+  API / Trigger column: describe whatever entry point enforces this rule.
+  e.g. HTTP endpoint, CLI command, queue message type, UI action, cron job.
+-->
+
+| Action | Required approver | Trigger | Rejection response |
 |---|---|---|---|
-| [e.g., Role mutation] | Admin role | `POST /api/roles` | 403 for non-admin callers |
-| [Action] | [Approver] | [API] | [Response] |
+| [e.g., Role change] | Admin | [e.g., POST /api/roles / admin CLI command] | [e.g., 403 / error message] |
+| [Action] | [Approver] | [Trigger] | [Response] |
 
 ---
 
