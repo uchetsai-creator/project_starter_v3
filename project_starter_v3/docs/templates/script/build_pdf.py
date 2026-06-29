@@ -44,23 +44,22 @@ from pdf_allowlist import PDF_ALLOWLIST
 # Value can be a str (single doc) or list of str (inject into multiple docs).
 # For *-module-data-flow-class diagrams, the target is resolved dynamically in inject_diagrams.
 DIAGRAM_TARGETS = {
-    # Original two
-
-    "schema":                 "specs/data-model.md",
+    # Architecture diagrams
+    "architecture":            "architecture/architecture.md",
+    "schema":                  "specs/data-model.md",
     # State diagrams
-    "data-model-state":       "specs/data-model.md",
+    "data-model-state":        "specs/data-model.md",
     # *-object-state → matched dynamically in inject_diagrams
-    # Use case diagram — lives in permissions.md
-    "permissions-usecase":    "specs/permissions.md",
+    # Use case diagram
+    "permissions-usecase":     "specs/permissions.md",
     # *-process-activity → matched dynamically in inject_diagrams
     # Component diagrams
-    "architecture-component": "architecture/architecture.md",
-    "backend-component":      "architecture/backend.md",
-    "frontend-component":     "architecture/frontend.md",
+    "architecture-component":  "architecture/architecture.md",
+    "backend-component":       "architecture/backend.md",
+    "frontend-component":      "architecture/frontend.md",
+    # Page structure component diagram — injected into codebase-map as project overview
+    "codebase-map-component":  "codebase-map.md",
     # activity/sequence/*-class are matched dynamically in inject_diagrams
-    # A diagram key can map to a single doc (str) or multiple docs (list of str).
-    # When a list is given, the diagram is injected into every listed document.
-    "architecture": ["architecture/architecture.md", "codebase-map.md"],
 }
 
 
