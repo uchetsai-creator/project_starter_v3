@@ -75,6 +75,22 @@
 
 ## API Endpoint Access
 
+<!--
+  Cross-check required before finalising this table:
+  For every role listed as a "Responsible role" or "Owner" in any docs/business/*-process.md,
+  verify that role has at least the minimum endpoint access needed to perform its responsibility.
+
+  A role that is assigned a business responsibility but denied the required endpoint
+  is a logical contradiction — it must be resolved here, not left to the implementer to guess.
+
+  Steps:
+  1. Read every *-process.md file
+  2. Note every (role, action) pair in the Process Steps and Responsible role columns
+  3. Confirm each role can reach the endpoint that supports that action
+  4. If a gap exists, either grant access or explicitly document why the role uses
+     a different path (e.g., via a supervisor, via a separate tool)
+-->
+
 | Method | Path | Required permission | Minimum role | Extra condition |
 |---|---|---|---|---|
 | `POST` | `/[resource]` | `[resource]:create` | `ROLE_USER` | — |
