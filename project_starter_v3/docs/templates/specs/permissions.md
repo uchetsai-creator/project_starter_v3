@@ -89,15 +89,30 @@
   3. Confirm each role can reach the endpoint that supports that action
   4. If a gap exists, either grant access or explicitly document why the role uses
      a different path (e.g., via a supervisor, via a separate tool)
+
+  Source column — mandatory distinction:
+  Every row must specify whether access is a Hardcoded constraint or a Seeded default:
+    - Hardcoded: enforced in code (middleware with a fixed role list, route guard with
+      roles=[...]). Cannot be changed without a deployment. Document as a definitive rule
+      in business-rules.md if it encodes a business policy.
+    - Seeded default: the starting state in the database/role table. Can be changed at
+      runtime by an admin (e.g. via a Role Management page). Document as "(Default)" —
+      do NOT write it as a permanent rule in business-rules.md, since it can change
+      without a code deploy.
+
+  If this project has a Role Management feature, most role-permission rows are seeded
+  defaults, not hardcoded constraints. Mixing them up causes contradictions between
+  business-process.md (what a role should be able to do) and this table (what the role
+  can access right now, which may just be today's default).
 -->
 
-| Method | Path | Required permission | Minimum role | Extra condition |
-|---|---|---|---|---|
-| `POST` | `/[resource]` | `[resource]:create` | `ROLE_USER` | — |
-| `GET` | `/[resource]` | `[resource]:read` | `ROLE_GUEST` | — |
-| `GET` | `/[resource]/:id` | `[resource]:read` | `ROLE_GUEST` | — |
-| `PATCH` | `/[resource]/:id` | `[resource]:update` | `ROLE_USER` | Own resource only |
-| `DELETE` | `/[resource]/:id` | `[resource]:delete` | `ROLE_USER` | Own resource only |
+| Method | Path | Required permission | Minimum role | Source | Extra condition |
+|---|---|---|---|---|---|
+| `POST` | `/[resource]` | `[resource]:create` | `ROLE_USER` | [Hardcoded / Seeded default] | — |
+| `GET` | `/[resource]` | `[resource]:read` | `ROLE_GUEST` | [Hardcoded / Seeded default] | — |
+| `GET` | `/[resource]/:id` | `[resource]:read` | `ROLE_GUEST` | [Hardcoded / Seeded default] | — |
+| `PATCH` | `/[resource]/:id` | `[resource]:update` | `ROLE_USER` | [Hardcoded / Seeded default] | Own resource only |
+| `DELETE` | `/[resource]/:id` | `[resource]:delete` | `ROLE_USER` | [Hardcoded / Seeded default] | Own resource only |
 
 ---
 
