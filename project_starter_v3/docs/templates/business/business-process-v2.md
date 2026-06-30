@@ -1,371 +1,141 @@
-# Document Purposes
+# Business Process Index
 
 <!--
-  Reference only. Not read every task.
-  The mandatory per-task update check lives in AGENTS.md → Document Update Checklist.
-  This file explains WHY and details each document's purpose, update triggers, and
-  which diagram script to run after updating.
+  This file is the index and rule definition for all business process documents.
+  Each business process has its own dedicated file under docs/business/.
+  Each process file must follow the rules and format defined in this document.
+
+  Naming convention: [process-name]-process.md
+  Location: docs/business/[process-name]-process.md
+  Examples:
+    docs/business/order-create-process.md
+    docs/business/order-cancel-process.md
+    docs/business/inventory-restock-process.md
+
+  Files matching *-process.md are automatically included in the PDF.
+  After writing a new process file, run:
+  python3 docs/script/activity_to_html.py docs/business/[process-name]-process.md
 -->
 
-## Specs (docs/specs/)
+---
 
-### research.md
-Update when:
-* New technology decisions are made
-* NEEDS CLARIFICATION items are resolved
-* Architecture decisions change
+## Rules
 
-### data-model.md
-Update when:
-* Schema changes
-* New entities are added
-* Relationships change
-* Indexes are added or removed
-* State transitions change in any `docs/business/*-object.md` — update the ENUM mapping here to match, but do not redefine transitions (object file is canonical)
+* This file acts as the index and rule definition.
+* Do not put process content in this file.
+* Each business process must have its own file.
+* Each process file must follow the rules and format defined in this document.
 
-After updating, regenerate both diagrams:
-* ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
-  (output must go inside docs/ so build_pdf.py can find it)
-* State diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
+### Content Rules
 
-### api-contract.md
-Purpose:
-Describes the full specification for every API endpoint and real-time event.
-Default format assumes REST as the primary protocol. If the project also uses
-WebSocket, Socket.IO, GraphQL, gRPC, or CLI — add a section for each protocol.
-Do not omit a protocol because it was not in the original template.
+* Focus on WHAT happens from a business perspective.
+* Do not describe which service or code handles each step.
+* Do not describe validation logic or database actions.
+* Technical cross-module calls belong in docs/modules/[module]/[module]-flow.md — not here.
 
-Update when:
-* New endpoints are added
-* New WebSocket / Socket.IO events are added or changed
-* Request/response/payload format changes
-* Error codes are added
-* Validation rules change
+### Activity Diagram Rules
 
-### permissions.md
-Update when:
-* New roles are added
-* Permission matrix changes
-* New endpoints are added to API contract
-* New features are added to the system
-* Any `*-process.md` assigns a new "Responsible role" — cross-check that role has the required endpoint access
-* Role permission defaults are seeded or changed via a Role Management feature — mark the row "(Default)", do not promote it to business-rules.md
-
-After updating, regenerate use case diagram:
-`python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
-
-The use case diagram is a **system-level view** — it lists ALL roles and ALL major
-functions across all modules in one diagram, not per resource or per module.
-
-Source distinction: every row in the API Endpoint Access table must specify whether
-access is a Hardcoded constraint (enforced in code, needs a deployment to change) or
-a Seeded default (database starting value, changeable at runtime by an admin). Only
-Hardcoded constraints belong in business-rules.md as permanent rules.
-
-Cross-check rule: every role listed as a responsible actor in any `*-process.md` must have
-at least the minimum API endpoint access to perform that responsibility. A gap is a logical
-contradiction that must be resolved before implementation.
-
-### logging-spec.md
-Purpose:
-Define logging rules, format, and module naming conventions.
-Logger instantiation pattern is documented here in a language/framework-agnostic way —
-use whatever the project's logging library provides.
-All modules must follow this spec.
-
-Update when:
-* New modules are added (add one line to the Module Naming Convention table)
-* Log format changes
-* Logger instantiation pattern changes
-
-This file is the rule definition only — do not add module-specific logging content here.
-Module-specific log points live in docs/modules/[module]/log-[module].md.
-
-### specs/quickstart.md
-Purpose:
-Step-by-step guide for setting up and running the project locally.
-Covers prerequisites, environment variables, startup commands, and verification steps.
-
-Update when:
-* Setup steps change
-* New prerequisites are added
-* Verification steps change
-* Environment variable requirements change
+* Every process file must include an activity block.
+* The activity block describes business steps and decision branches only.
+* Do not reference specific services, repositories, or technical implementation in the diagram.
+* After writing, run: `python3 docs/script/activity_to_html.py docs/business/[process-name]-process.md`
 
 ---
 
-## Architecture (docs/architecture/)
+## Process Files
 
-### architecture.md
-Purpose:
-Describe system component overview and data flow.
-Holds the structured YAML block used by architecture_to_html.py to generate the diagram.
-Component type is a free-form label — use whatever best describes the component's role.
-
-Update when:
-* New components are added
-* Data flows change
-* Integration changes
-
-After updating, regenerate diagram:
-`python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
-
-### backend.md
-Purpose:
-Describe backend structure — stack, layering, layer responsibilities, module pattern.
-Use the actual layer names from the codebase — do not assume Controller/Service/Repository.
-Includes a component block for the backend module structure diagram.
-
-Update when:
-* Backend layering, stack, or module pattern changes
-
-After updating, regenerate component diagram:
-`python3 docs/script/component_to_html.py docs/architecture/backend.md`
-
-### frontend.md
-Purpose:
-Describe frontend structure — stack, page structure, component strategy, API hook strategy.
-Includes a component block for the frontend module structure diagram.
-
-Update when:
-* Frontend stack, page structure, or component strategy changes
-
-After updating, regenerate component diagram:
-`python3 docs/script/component_to_html.py docs/architecture/frontend.md`
-
-### database.md
-Purpose:
-Describe database structure at the conceptual level — main entities, main relationships,
-important constraints. Not a field-by-field schema; that level of detail belongs in
-docs/specs/data-model.md.
-
-Update when:
-* Main entities or relationships change
-
-### deployment.md
-Purpose:
-Describe runtime structure — services, environment variables, local startup flow,
-build/deploy flow. Includes Cache Policy section for any caching layer.
-
-Update when:
-* Services, env vars, or build/deploy flow changes
-* A caching layer is added or its TTL / invalidation strategy changes
-* Cache boundary conditions or consumer behaviour is clarified
+| Process | File | Owner |
+|---|---|---|
+| [e.g., Create Order] | `docs/business/order-create-process.md` | [e.g., Customer] |
+| [process name] | `docs/business/[process-name]-process.md` | [owner] |
 
 ---
 
-## Flows (docs/modules/)
+## Process File Format
 
-### module-data-flow.md
-Purpose:
-Index and rule definition for module-level code flows. Sits at `docs/modules/module-data-flow.md`.
-Defines three module types — Feature, Background Job, Shared Utility — each with its own flow format.
-Each module gets its own subfolder (`docs/modules/[module]/`) with its own flow file.
+Each process file must follow this format exactly:
 
-Update when:
-* A new module is created — add a row to the Module Flow Files table
+```markdown
+# [Process Name]
 
-### [module]-module-data-flow.md
-Purpose:
-Track code-level execution flow (function names, file paths) for a specific module.
-Declare the module type at the top: Feature / Background Job / Shared Utility.
-Flow format follows the matching format defined in module-data-flow.md — do not assume
-Controller/Service/Repository; use the real layer names from the codebase.
-Also includes a class block describing the module's structure.
+## Business Goal
+[What is the purpose of this business process? 1-3 sentences.]
 
-Location: `docs/modules/[module]/[module]-module-data-flow.md`
-Examples: `docs/modules/order/order-module-data-flow.md`
+## Process Overview
 
-Files matching this pattern are automatically included in the PDF.
+Focus on:
+- Major business stages
+- Process sequence
+- Process ownership
 
-Update when:
-* Function names or file paths change for this module
-* A new operation is implemented
-* The module's class structure changes
+Do not describe:
+- Which service handles each step
+- Validation logic
+- Database actions
 
-After updating, regenerate class diagram:
-`python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
+\`\`\`
+Start → [Stage 1] → [Stage 2] → [Stage 3] → End
+\`\`\`
 
-### module-flow.md
-Purpose:
-Index and rule definition for all module flow documents.
-Each module has its own flow file: `docs/modules/[module]/[module]-flow.md`.
+## Process Steps
 
-Update when:
-* A new module flow file is created — add a row to the Flow Files table
+<!--
+  Prerequisites column: if the Owner role needs something beyond the role itself to perform
+  this step — a specific page access, a permission, a precondition state — note it here.
+  This keeps the condition visible at the step level, not just in a separate Permission Note
+  the reader might skip past.
 
-### [module]-flow.md
-Purpose:
-Describe cross-module service call sequences for a specific module.
-Includes a Sequence Diagram for each cross-module process.
-Business steps and decision branches belong in docs/business/[process-name]-process.md.
+  Examples: "requires page:alarmCenter access", "requires WorkOrder status = active",
+  "requires prior approval from Admin". Use "—" if there is no prerequisite beyond the role.
+-->
 
-Location: `docs/modules/[module]/[module]-flow.md`
-Example: `docs/modules/order/order-flow.md`
+| Step | Owner | Prerequisites | Input | Action | Output | Next step |
+|---|---|---|---|---|---|---|
+| [Step name] | [Owner] | [— or condition, e.g., requires page:X access] | [Input] | [What happens] | [Output] | [Next step] |
 
-Files matching `*-flow.md` are automatically included in the PDF.
+## Activity Diagram
 
-Update when:
-* Cross-module service calls change
-* A new cross-module process is added to this module
+\`\`\`activity
+title: [Process Name]
 
-After updating, regenerate sequence diagram:
-`python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
+start
+:[Step 1];
+:[Step 2];
+if ([Decision Point]?) then (yes)
+  :[Step 3a];
+  if ([Another Decision]?) then (yes)
+    :[Step 4a];
+  else (no)
+    :[Step 4b];
+  endif
+else (no)
+  :[Step 3b];
+endif
+:[Final Step];
+stop
+\`\`\`
 
-### log-[module].md
-Purpose:
-Track every log point in a module, in call order. One file per module.
-Not included in the PDF — this is an implementation detail reference for developers.
+## Decision Points
 
-Location: `docs/modules/[module]/log-[module].md`
-Generate when the module is complete (see AGENTS.md → Module Completion Check).
-Update immediately if function names or file paths change.
-
----
-
-## Business (docs/business/)
-
-### business-process.md
-Purpose:
-Index file listing all business process documents.
-Each business process has its own dedicated file: `docs/business/[process-name]-process.md`.
-
-Update when:
-* A new business process file is created — add a row to the table
-
-### [process-name]-process.md
-Purpose:
-Describe one business process — goal, steps, decision points, exceptions, and Activity Diagram.
-Cross-module technical call sequences belong in docs/modules/[module]/[module]-flow.md.
-Process Steps table includes a Prerequisites column — any access condition the Owner role
-needs beyond the role itself (page access, permission, precondition state) must be noted
-at the step level, not only in a separate Permission Note a reader could skip past.
-
-Location: `docs/business/[process-name]-process.md`
-Examples: `order-create-process.md`, `order-cancel-process.md`
-
-Files matching `*-process.md` are automatically included in the PDF.
-
-Update when:
-* The business workflow, decision points, or exceptions change
-* A step's access prerequisite changes — update the Prerequisites column, not just a footnote
-
-After updating, regenerate activity diagram:
-`python3 docs/script/activity_to_html.py docs/business/[process-name]-process.md`
-
-### business-objects.md
-Purpose:
-Index and rule definition for all business object documents.
-Each business object has its own file: `docs/business/[object-name]-object.md`.
-Not every entity needs an object file — configuration/seed entities with no business
-lifecycle (Role, Permission, Category, etc.) are excluded; see the Configuration Entity
-Exception in this file's Rules section. Excluded entities still appear in the
-Relationships table with a note pointing to where they're actually documented.
-
-Update when:
-* A new business object file is created — add a row to the table
-* A relationship between objects changes — update the Relationships table
-* An entity is identified as configuration-only — add a note under Relationships
-  pointing to its real documentation location instead of creating an object file
-
-### [object-name]-object.md
-Purpose:
-Describe one business entity — who owns it, who creates it, its lifecycle, and its
-business-level state machine. Technical field-level detail belongs in docs/specs/data-model.md.
-This file is the canonical source of truth for state transitions — `data-model.md` maps
-ENUM values to these states but must not contradict them.
-
-Location: `docs/business/[object-name]-object.md`
-Examples: `order-object.md`, `inventory-object.md`
-
-Files matching `*-object.md` are automatically included in the PDF.
-
-Update when:
-* The business entity's description, ownership, or lifecycle changes
-* Status transitions or responsible roles change
-
-After updating, regenerate state diagram:
-`python3 docs/script/state_to_html.py docs/business/[object-name]-object.md`
-
-### business-rules.md
-Purpose:
-Describe business constraints and policies — approval rules, validation rules,
-notification rules, audit rules. Each rule must declare its Enforcement Layer.
-Only Hardcoded constraints belong here — Seeded defaults belong in permissions.md,
-not here, since they can change without a deployment.
-
-Update when:
-* Business rules change
-* A constraint moves from Seeded default to Hardcoded (or vice versa) — move the
-  entry between business-rules.md and permissions.md accordingly
-
----
-
-## Root-level (docs/)
-
-### current-state.md
-Purpose:
-The active task. Read first when continuing an existing project.
-
-### changelog.md
-Purpose:
-Completed task history. Current Task moves here once finished.
-
-### codebase-map.md
-Purpose:
-Track which files are package usage vs custom logic, classified by layer (DB/BE/FE/MOD/JOB).
-Includes a project tree (from project root) with documentation coverage status per module.
-Used to verify the Package First principle is being followed.
-Also serves as the project overview section in the PDF — a page structure component diagram
-is injected here so readers get a visual of the frontend structure before diving into the file listing.
-
-Update when:
-* A task is completed — add the files touched in that task
-* Re-run `python3 docs/script/scan_codebase.py <src_dir> --update docs/codebase-map.md`
-  to refresh the tree view and coverage summary
-* Frontend page/screen structure changes — update the component block in this file
-
-Do not scan the entire repository to regenerate this file. Update incrementally, one task at a time.
-
-Diagram: Page structure component diagram — update the ```component block in codebase-map.md,
-then run `python3 docs/script/component_to_html.py docs/codebase-map.md` to regenerate.
-The output (`codebase-map-component.html`) is picked up automatically by `build_pdf.py`.
-
----
-
-## Scripts (docs/script/)
-
-### pdf_allowlist.py
-Purpose:
-Single source of truth for which files appear in the PDF, in what order, and under which section.
-Both `build_pdf.py` and `translate_docs.py` import from this file.
-
-Update when:
-* A new permanent document is added to `docs/` and should appear in the PDF
-
-Do not edit `build_pdf.py` or `translate_docs.py` for this purpose — edit only this file.
-
-### scan_codebase.py
-Purpose:
-Scans the source directory and reports which modules are documented, undocumented,
-or shared/infrastructure. Outputs a project tree (from project root) with `←` annotations
-and documentation coverage icons.
-
-Run at the start of a retrofit (Step 1b) to inventory all modules before documentation begins.
-Run again after Step 3 to confirm full coverage.
-Run with `--update docs/codebase-map.md` to write the tree and coverage table into codebase-map.md.
-
----
-
-## Diagram Scripts Reference
-
-| Script | Input format | Output suffix | Embedded in |
+| Decision | Decision maker | Input | Possible outcomes |
 |---|---|---|---|
-| `architecture_to_html.py` | yaml block in architecture.md | `.html` / `.svg` | `architecture/architecture.md` |
-| `schema_to_html.py` | Prisma / SQL file | `.html` / `.svg` | `specs/data-model.md` |
-| `state_to_html.py` | state block in any .md | `-state.html` / `.svg` | `specs/data-model.md`, `business/*-object.md` |
-| `usecase_to_html.py` | usecase block in any .md | `-usecase.html` / `.svg` | `specs/permissions.md` |
-| `activity_to_html.py` | activity block in any .md | `-activity.html` / `.svg` | `business/*-process.md` |
-| `sequence_to_html.py` | sequence block in any .md | `-sequence.html` / `.svg` | `modules/*/` flow files |
-| `class_to_html.py` | class block in any .md | `-class.html` / `.svg` | `modules/*/*-module-data-flow.md` |
-| `component_to_html.py` | component block in any .md | `-component.html` / `.svg` | `backend.md` / `frontend.md` |
+| [e.g., Stock available?] | [System] | [Order items] | Yes → Reserve / No → Notify out of stock |
+
+## Exceptions
+
+| Exception | Cause | Handling method | Responsible role |
+|---|---|---|---|
+| [e.g., Payment timeout] | [External API unreachable] | [Retry 3x, then notify ops] | [System / Ops] |
+
+## Pain Points
+
+| Current problem | Impact | Current workaround |
+|---|---|---|
+| [Problem] | [Impact on business] | [What people do today] |
+
+## Future Improvement Ideas
+
+| Improvement | Expected benefit |
+|---|---|
+| [Idea] | [What it would improve] |
+```
