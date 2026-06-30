@@ -79,9 +79,19 @@ Start → [Stage 1] → [Stage 2] → [Stage 3] → End
 
 ## Process Steps
 
-| Step | Owner | Input | Action | Output | Next step |
-|---|---|---|---|---|---|
-| [Step name] | [Owner] | [Input] | [What happens] | [Output] | [Next step] |
+<!--
+  Prerequisites column: if the Owner role needs something beyond the role itself to perform
+  this step — a specific page access, a permission, a precondition state — note it here.
+  This keeps the condition visible at the step level, not just in a separate Permission Note
+  the reader might skip past.
+
+  Examples: "requires page:alarmCenter access", "requires WorkOrder status = active",
+  "requires prior approval from Admin". Use "—" if there is no prerequisite beyond the role.
+-->
+
+| Step | Owner | Prerequisites | Input | Action | Output | Next step |
+|---|---|---|---|---|---|---|
+| [Step name] | [Owner] | [— or condition, e.g., requires page:X access] | [Input] | [What happens] | [Output] | [Next step] |
 
 ## Activity Diagram
 
