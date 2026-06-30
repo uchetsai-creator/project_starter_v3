@@ -11,6 +11,16 @@ Record business knowledge — constraints, policies, and rules that the system m
 
   Valid values: Frontend page guard / Backend middleware / Service layer /
                 Database constraint / All layers (specify which combination)
+
+  Before writing a rule here, confirm it is a Hardcoded constraint, not a Seeded default:
+    - Hardcoded: enforced in code, cannot change without a deployment — belongs here as
+      a permanent rule.
+    - Seeded default: a starting value in the database (e.g. default role permissions)
+      that an admin can change at runtime via a Role Management feature — does NOT
+      belong here as a permanent rule. Document it in permissions.md as "(Default)"
+      instead.
+  Writing a seeded default as a hardcoded rule means this file goes stale the moment
+  an admin changes the setting, with nothing to flag the contradiction.
 -->
 
 ---
