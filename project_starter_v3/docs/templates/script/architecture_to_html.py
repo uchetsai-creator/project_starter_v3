@@ -40,6 +40,23 @@ PROTOCOL_COLORS = {
 TW = 240
 TH = 56
 CH = 22
+
+
+def wrap_resp_text(text, max_chars=28):
+    """Wrap a responsibility line into multiple sub-lines for SVG rendering."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
 COLS = 4
 PX, PY = 140, 100
 
@@ -100,7 +117,8 @@ def card_height(name, nodes):
     n = nodes.get(name)
     if not n:
         return 80
-    return TH + len(n.get("responsibilities", [])) * CH
+    total_lines = sum(len(wrap_resp_text(r)) for r in n.get("responsibilities", []))
+    return TH + total_lines * (CH * 0.65) + len(n.get("responsibilities", [])) * (CH * 0.35)
 
 
 def card_edge_point(name, toward, pos, nodes):
@@ -176,15 +194,20 @@ def build_svg(nodes, edges, title):
             f'<text x="{x + TW/2}" y="{y + 38}" text-anchor="middle" fill="#ffffffcc" '
             f'font-size="9">{node["type"].upper()}</text>'
         )
-        for i, resp in enumerate(node.get("responsibilities", [])):
-            ry = y + TH + i * CH + 14
+        resp_cursor = y + TH
+        for resp in node.get("responsibilities", []):
+            lines = wrap_resp_text(resp)
+            dot_y = resp_cursor + 10
             svg_parts.append(
-                f'<circle cx="{x + 16}" cy="{ry - 4}" r="2.5" fill="{color["border"]}"/>'
+                f'<circle cx="{x + 16}" cy="{dot_y}" r="2.5" fill="{color["border"]}"/>'
             )
-            safe_resp = resp.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            svg_parts.append(
-                f'<text x="{x + 26}" y="{ry}" fill="#A0AEC0" font-size="10">{safe_resp}</text>'
-            )
+            for li, line in enumerate(lines):
+                safe_line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                line_y = resp_cursor + 14 + li * (CH * 0.65)
+                svg_parts.append(
+                    f'<text x="{x + 26}" y="{line_y}" fill="#A0AEC0" font-size="10">{safe_line}</text>'
+                )
+            resp_cursor += len(lines) * (CH * 0.65) + (CH * 0.35)
 
     svg_parts.append("</svg>")
     return "\n".join(svg_parts)
