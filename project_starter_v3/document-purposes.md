@@ -253,10 +253,16 @@ After updating, regenerate activity diagram:
 Purpose:
 Index and rule definition for all business object documents.
 Each business object has its own file: `docs/business/[object-name]-object.md`.
+Not every entity needs an object file — configuration/seed entities with no business
+lifecycle (Role, Permission, Category, etc.) are excluded; see the Configuration Entity
+Exception in this file's Rules section. Excluded entities still appear in the
+Relationships table with a note pointing to where they're actually documented.
 
 Update when:
 * A new business object file is created — add a row to the table
 * A relationship between objects changes — update the Relationships table
+* An entity is identified as configuration-only — add a note under Relationships
+  pointing to its real documentation location instead of creating an object file
 
 ### [object-name]-object.md
 Purpose:
