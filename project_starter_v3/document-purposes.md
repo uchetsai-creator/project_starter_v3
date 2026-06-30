@@ -21,6 +21,7 @@ Update when:
 * New entities are added
 * Relationships change
 * Indexes are added or removed
+* State transitions change in any `docs/business/*-object.md` — update the ENUM mapping here to match, but do not redefine transitions (object file is canonical)
 
 After updating, regenerate both diagrams:
 * ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
@@ -47,12 +48,17 @@ Update when:
 * Permission matrix changes
 * New endpoints are added to API contract
 * New features are added to the system
+* Any `*-process.md` assigns a new "Responsible role" — cross-check that role has the required endpoint access
 
 After updating, regenerate use case diagram:
 `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
 
 The use case diagram is a **system-level view** — it lists ALL roles and ALL major
 functions across all modules in one diagram, not per resource or per module.
+
+Cross-check rule: every role listed as a responsible actor in any `*-process.md` must have
+at least the minimum API endpoint access to perform that responsibility. A gap is a logical
+contradiction that must be resolved before implementation.
 
 ### logging-spec.md
 Purpose:
@@ -133,10 +139,12 @@ Update when:
 ### deployment.md
 Purpose:
 Describe runtime structure — services, environment variables, local startup flow,
-build/deploy flow.
+build/deploy flow. Includes Cache Policy section for any caching layer.
 
 Update when:
 * Services, env vars, or build/deploy flow changes
+* A caching layer is added or its TTL / invalidation strategy changes
+* Cache boundary conditions or consumer behaviour is clarified
 
 ---
 
@@ -248,6 +256,8 @@ Update when:
 Purpose:
 Describe one business entity — who owns it, who creates it, its lifecycle, and its
 business-level state machine. Technical field-level detail belongs in docs/specs/data-model.md.
+This file is the canonical source of truth for state transitions — `data-model.md` maps
+ENUM values to these states but must not contradict them.
 
 Location: `docs/business/[object-name]-object.md`
 Examples: `order-object.md`, `inventory-object.md`
