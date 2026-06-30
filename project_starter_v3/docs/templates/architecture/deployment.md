@@ -142,6 +142,35 @@ How to confirm the system is running correctly after startup.
 
 ---
 
+## Cache Policy
+
+<!--
+  Include this section if any layer of the system uses caching (Redis, in-memory, CDN, etc.).
+  Remove it if the system has no caching layer.
+
+  For every cache key or layer, document:
+  - TTL: how long cached data is considered fresh
+  - Invalidation trigger: what causes the cache to be cleared before TTL expires
+  - Boundary handling: what happens when a write occurs within the TTL window
+
+  Boundary conditions are mandatory — "stale reads possible" is not enough.
+  The consumer (frontend, downstream service) must know what to do when it detects stale data.
+-->
+
+| Key / Layer | TTL | Invalidation trigger | Boundary handling |
+|---|---|---|---|
+| `[cache key or layer name]` | [e.g., 2s] | [e.g., write to DB, explicit flush] | [e.g., stale reads possible for up to TTL after write; consumer retries on state mismatch] |
+
+**Boundary conditions:**
+
+| Scenario | Expected behaviour | Consumer action |
+|---|---|---|
+| Write occurs within TTL window | Cache may serve stale data for up to [TTL] | [e.g., poll again after TTL / show loading state / use optimistic UI] |
+| Cache miss | [e.g., read-through from DB / return 503] | [e.g., retry with backoff] |
+| Invalidation fails | [e.g., stale entry persists until TTL expires] | [e.g., force-refresh button / automatic retry] |
+
+---
+
 ## Teardown
 
 ```bash
