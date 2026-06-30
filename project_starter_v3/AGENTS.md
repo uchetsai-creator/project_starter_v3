@@ -19,16 +19,21 @@ before starting. For example, if you use `docs/flows/` instead of `docs/modules/
 If starting a new project:
 1. Create docs/project-requirements.md from templates/project-requirements.md.
 2. Create docs/specs/research.md from templates/specs/research.md (resolve all NEEDS CLARIFICATION).
-3. Create docs/architecture/architecture.md from templates/architecture/architecture.md.
-4. Create docs/architecture/backend.md, frontend.md, database.md, deployment.md from templates/architecture/.
-5. Create docs/specs/data-model.md from templates/specs/data-model.md.
-6. Create docs/specs/api-contract.md from templates/specs/api-contract.md.
-7. Create docs/specs/permissions.md from templates/specs/permissions.md.
-8. Create docs/business/business-process.md from templates/business/business-process.md.
-9. Create docs/business/business-objects.md from templates/business/business-objects.md.
-10. Create docs/business/business-rules.md from templates/business/business-rules.md.
-11. Create docs/project-plan.md from templates/project-plan.md.
-12. Create docs/current-state.md from templates/current-state.md.
+3. Create docs/specs/quickstart.md from templates/specs/quickstart.md.
+4. Create docs/architecture/architecture.md from templates/architecture/architecture.md.
+5. Create docs/architecture/backend.md, frontend.md, database.md, deployment.md from templates/architecture/.
+6. Create docs/specs/data-model.md from templates/specs/data-model.md.
+7. Create docs/specs/api-contract.md from templates/specs/api-contract.md.
+8. Create docs/specs/permissions.md from templates/specs/permissions.md.
+9. Create docs/specs/logging-spec.md from templates/specs/logging-spec.md.
+10. Create docs/business/business-process.md from templates/business/business-process-v2.md.
+11. Create docs/business/business-objects.md from templates/business/business-objects-v2.md.
+12. Create docs/business/business-rules.md from templates/business/business-rules.md.
+13. Create docs/modules/module-data-flow.md from templates/modules/module-data-flow-v2.md.
+14. Create docs/modules/module-flow.md from templates/modules/module-flow-v2.md.
+15. Create docs/codebase-map.md from templates/codebase-map.md.
+16. Create docs/project-plan.md from templates/project-plan.md.
+17. Create docs/current-state.md from templates/current-state.md.
 
 ---
 
@@ -89,6 +94,10 @@ Step 2 — Fill in architecture and spec documents (describe what exists):
 Step 3 — Fill in module flow files (one module at a time, following the confirmed inventory from Step 1b):
 
 For each module in the confirmed inventory:
+0. Verify docs/modules/module-data-flow.md contains a "## Module Types" section defining
+   Feature / Background Job / Shared Utility. If it is missing (older copy of this template),
+   copy the current templates/modules/module-data-flow-v2.md content into it before proceeding —
+   do not invent your own module type definitions.
 1. Determine the module type: Feature / Background Job / Shared Utility
    (follow the rules in docs/modules/module-data-flow.md)
 2. Create docs/modules/[module]/[module]-module-data-flow.md following the matching format.
@@ -229,7 +238,9 @@ Run through every item below after every task. This is mandatory, not optional.
   - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
     (output must go inside docs/ so build_pdf.py can find it)
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
+  State Machine Consistency check: if this task touched an entity with a status lifecycle, confirm the State Machine section here matches the canonical definition in docs/business/[object-name]-object.md exactly. If they differ, update this file to match — the object file wins.
 - [ ] docs/specs/api-contract.md — were endpoints added/changed, did error codes or validation rules change, or were WebSocket/Socket.IO events / GraphQL queries or mutations / gRPC methods / CLI commands added or changed? If yes, update the relevant protocol section.
+  API Endpoint Overlap check: if this task added an endpoint whose purpose overlaps with an existing one (e.g. two endpoints affecting the same state), add a **Design Note:** under each explaining why they are separate, or consolidate into one.
 - [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
   After updating: cross-check every role listed as "Responsible role" in any `*-process.md` against the API Endpoint Access table and Page Access Matrix. If a role is responsible for an action but has no access to the required page or endpoint, this is a logical contradiction — resolve it before proceeding.
 - [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
