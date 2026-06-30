@@ -39,6 +39,10 @@
 * Technical state details (ENUM values, DB constraints) belong in docs/specs/data-model.md.
 * After writing, run: `python3 docs/script/state_to_html.py docs/business/[object-name]-object.md`
 
+**Canonical source:** The state block in this object file is the single source of truth for state transitions.
+`data-model.md` maps ENUM values to these states but must not redefine or contradict transitions.
+If transitions differ between the two files, this object file wins — update `data-model.md` to match.
+
 ---
 
 ## Object Files
