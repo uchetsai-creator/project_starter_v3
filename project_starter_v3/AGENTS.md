@@ -110,6 +110,12 @@ Step 4 — Fill in project status documents:
    or write "Documentation retrofit complete — ready for new tasks" if everything is done.
 
 Step 5 — Generate the PDF:
+
+Before running build_pdf.py, verify flow tables are not empty:
+1. Open `docs/modules/module-data-flow.md` — if the Module Flow Files table contains only placeholder rows (no real module names), Step 3 is incomplete. Finish all module flow files first.
+2. Open `docs/modules/module-flow.md` — same check for the Flow Files table.
+Do not generate the PDF with empty flow index tables.
+
 `python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
 
 ---
@@ -225,6 +231,7 @@ Run through every item below after every task. This is mandatory, not optional.
   - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
 - [ ] docs/specs/api-contract.md — were endpoints added/changed, did error codes or validation rules change, or were WebSocket/Socket.IO events / GraphQL queries or mutations / gRPC methods / CLI commands added or changed? If yes, update the relevant protocol section.
 - [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
+  After updating: cross-check every role listed as "Responsible role" in any `*-process.md` against the API Endpoint Access table and Page Access Matrix. If a role is responsible for an action but has no access to the required page or endpoint, this is a logical contradiction — resolve it before proceeding.
 - [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
 - [ ] docs/codebase-map.md Page Structure block — did the frontend page/screen structure change? If yes, update the component block, then regenerate: `python3 docs/script/component_to_html.py docs/codebase-map.md`
 - [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
