@@ -32,6 +32,37 @@
 * Focus on who owns it, who creates it, who uses it, and its lifecycle.
 * Technical field-level detail belongs in docs/specs/data-model.md — not here.
 
+### Configuration Entity Exception
+
+Not every entity in data-model.md needs its own `*-object.md` file. Skip it for entities that are:
+
+* **Configuration / seed data** — created at deploy time, not by users during normal operation
+  (e.g. Role, Permission, Category, Status, Tag)
+* **No business lifecycle** — does not move through states like draft → active → closed;
+  it is either present or not, or only changes via direct admin edit
+* **No independent ownership story** — no single "owner" who creates/updates/uses it the way
+  a real business object does
+
+For these entities:
+1. Do NOT create a `*-object.md` file for them
+2. Do NOT add them to the Object Files index table above
+3. In the Relationships table, still record how they relate to real business objects
+   (e.g. `User | many-to-one | Role`)
+4. Add a short note under the Relationships table pointing to where the entity IS documented —
+   typically `docs/specs/data-model.md` (schema), `docs/specs/permissions.md` (if it's
+   access-control related), or a relevant `*-process.md` (if there's a management workflow)
+
+Example note:
+
+> **Note on Role:** Role is a configuration entity with no status lifecycle and no
+> owner-managed state transitions. It does not have a standalone `role-object.md`.
+> Role is documented in `docs/specs/permissions.md` (access control model and seeded
+> defaults) and `docs/specs/data-model.md` (schema). The business process for managing
+> roles is in `docs/business/role-management-process.md` (if one exists).
+
+If you are unsure whether an entity qualifies for this exception, default to creating
+the object file — the exception is for clear cases only, not a shortcut to skip work.
+
 ### State Diagram Rules
 
 * Every object file must include a state block if the object has a status lifecycle.
