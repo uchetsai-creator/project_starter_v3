@@ -30,6 +30,18 @@
 
 ## Overview
 
+<!--
+  Sub-action endpoint rule:
+  For state-transition endpoints (e.g., /:id/acknowledge, /:id/cancel, /:id/publish):
+  - Document whether the endpoint handles only one direction (e.g., acknowledge only)
+    or both directions (e.g., acknowledge + un-acknowledge via request body).
+  - If two endpoints overlap in purpose (e.g., /acknowledge and /acknowledgement both
+    affect the same state), add a **Design Note:** under each endpoint explaining why
+    they are separate. If no justification exists, consolidate into one endpoint.
+  - Deprecated endpoints must be marked with ~~strikethrough~~ in the Overview table
+    and include a `**Deprecated:** Use [replacement endpoint] instead.` note.
+-->
+
 | Method | Path | Description | Auth |
 |---|---|---|---|
 | `POST` | `/[resource]` | [description] | ✅ |
