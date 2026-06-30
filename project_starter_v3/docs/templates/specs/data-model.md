@@ -69,6 +69,13 @@
   For SQL: corresponds to an ENUM or string field named `status`.
   For document DB: corresponds to a string field with allowed values.
   Omit this section if there is no status lifecycle.
+
+  IMPORTANT: State transitions are defined in docs/business/[object-name]-object.md —
+  that file is the canonical source of truth. Do NOT redefine transitions here.
+  This section should only:
+    1. List the ENUM / allowed string values
+    2. Map each value to its business-level state name from the object file
+  If the transitions listed here differ from the object file, update this section to match.
 -->
 
 ```
