@@ -140,9 +140,25 @@ def build_svg(nodes, edges, title):
     max_x = max((p["x"] + TW for p in pos.values()), default=400) + 60
     max_y = max((p["y"] + card_height(n, nodes) for n, p in pos.items()), default=300) + 60
 
+    # Defence-in-depth: clip each card's responsibility area so that even if wrap_resp_text
+    # under-estimates line width for an edge case, text cannot visually escape the card bounds.
+    clip_defs = []
+    for name in nodes:
+        if name not in pos:
+            continue
+        p = pos[name]
+        h = card_height(name, nodes)
+        clip_id = "cr-" + re.sub(r'[^a-zA-Z0-9]', '-', name)
+        clip_defs.append(
+            f'<clipPath id="{clip_id}">'
+            f'<rect x="{p["x"] + 4}" y="{p["y"] + TH}" width="{TW - 8}" height="{h - TH + 2}"/>'
+            f'</clipPath>'
+        )
+
     svg_parts = [
         f'<svg viewBox="0 0 {max_x} {max_y}" xmlns="http://www.w3.org/2000/svg" '
         f'font-family="Segoe UI, Arial, sans-serif">',
+        f'<defs>{"".join(clip_defs)}</defs>',
         f'<rect x="0" y="0" width="{max_x}" height="{max_y}" fill="#1A202C"/>',
     ]
 
@@ -194,6 +210,7 @@ def build_svg(nodes, edges, title):
             f'<text x="{x + TW/2}" y="{y + 38}" text-anchor="middle" fill="#ffffffcc" '
             f'font-size="9">{node["type"].upper()}</text>'
         )
+        clip_id = "cr-" + re.sub(r'[^a-zA-Z0-9]', '-', name)
         resp_cursor = y + TH
         for resp in node.get("responsibilities", []):
             lines = wrap_resp_text(resp)
@@ -205,7 +222,8 @@ def build_svg(nodes, edges, title):
                 safe_line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 line_y = resp_cursor + 14 + li * (CH * 0.65)
                 svg_parts.append(
-                    f'<text x="{x + 26}" y="{line_y}" fill="#A0AEC0" font-size="10">{safe_line}</text>'
+                    f'<text x="{x + 26}" y="{line_y}" fill="#A0AEC0" font-size="10" '
+                    f'clip-path="url(#{clip_id})">{safe_line}</text>'
                 )
             resp_cursor += len(lines) * (CH * 0.65) + (CH * 0.35)
 
