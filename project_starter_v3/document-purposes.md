@@ -49,12 +49,18 @@ Update when:
 * New endpoints are added to API contract
 * New features are added to the system
 * Any `*-process.md` assigns a new "Responsible role" — cross-check that role has the required endpoint access
+* Role permission defaults are seeded or changed via a Role Management feature — mark the row "(Default)", do not promote it to business-rules.md
 
 After updating, regenerate use case diagram:
 `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
 
 The use case diagram is a **system-level view** — it lists ALL roles and ALL major
 functions across all modules in one diagram, not per resource or per module.
+
+Source distinction: every row in the API Endpoint Access table must specify whether
+access is a Hardcoded constraint (enforced in code, needs a deployment to change) or
+a Seeded default (database starting value, changeable at runtime by an admin). Only
+Hardcoded constraints belong in business-rules.md as permanent rules.
 
 Cross-check rule: every role listed as a responsible actor in any `*-process.md` must have
 at least the minimum API endpoint access to perform that responsibility. A gap is a logical
@@ -274,10 +280,14 @@ After updating, regenerate state diagram:
 ### business-rules.md
 Purpose:
 Describe business constraints and policies — approval rules, validation rules,
-notification rules, audit rules.
+notification rules, audit rules. Each rule must declare its Enforcement Layer.
+Only Hardcoded constraints belong here — Seeded defaults belong in permissions.md,
+not here, since they can change without a deployment.
 
 Update when:
 * Business rules change
+* A constraint moves from Seeded default to Hardcoded (or vice versa) — move the
+  entry between business-rules.md and permissions.md accordingly
 
 ---
 
