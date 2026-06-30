@@ -1,271 +1,81 @@
-# AGENTS
+# Business Rules
 
-## Path Convention
+Record business knowledge — constraints, policies, and rules that the system must enforce.
 
-Module flow files live in: `docs/modules/`
-Codebase map lives in: `docs/codebase-map.md`
-Document purposes reference lives in: `document-purposes.md` (repo root)
+<!--
+  Enforcement Layer is mandatory for every rule. A rule that only says "operator cannot
+  access X" without specifying WHERE it is enforced creates ambiguity: is it a frontend
+  page guard only, or does the backend API also block it? If only the frontend enforces
+  it, the backend may be unintentionally open. State the layer explicitly so this gap
+  cannot occur silently.
 
-If your project uses different folder names, search-replace the paths in this file
-before starting. For example, if you use `docs/flows/` instead of `docs/modules/`:
-  - Search: `docs/modules/`
-  - Replace: `docs/flows/`
-  - Also update `pdf_allowlist.py` to match.
-
----
-
-## Project Initialization
-
-If starting a new project:
-1. Create docs/project-requirements.md from templates/project-requirements.md.
-2. Create docs/specs/research.md from templates/specs/research.md (resolve all NEEDS CLARIFICATION).
-3. Create docs/specs/quickstart.md from templates/specs/quickstart.md.
-4. Create docs/architecture/architecture.md from templates/architecture/architecture.md.
-5. Create docs/architecture/backend.md, frontend.md, database.md, deployment.md from templates/architecture/.
-6. Create docs/specs/data-model.md from templates/specs/data-model.md.
-7. Create docs/specs/api-contract.md from templates/specs/api-contract.md.
-8. Create docs/specs/permissions.md from templates/specs/permissions.md.
-9. Create docs/specs/logging-spec.md from templates/specs/logging-spec.md.
-10. Create docs/business/business-process.md from templates/business/business-process-v2.md.
-11. Create docs/business/business-objects.md from templates/business/business-objects-v2.md.
-12. Create docs/business/business-rules.md from templates/business/business-rules.md.
-13. Create docs/modules/module-data-flow.md from templates/modules/module-data-flow-v2.md.
-14. Create docs/modules/module-flow.md from templates/modules/module-flow-v2.md.
-15. Create docs/codebase-map.md from templates/codebase-map.md.
-16. Create docs/project-plan.md from templates/project-plan.md.
-17. Create docs/current-state.md from templates/current-state.md.
+  Valid values: Frontend page guard / Backend middleware / Service layer /
+                Database constraint / All layers (specify which combination)
+-->
 
 ---
 
-If retrofitting an existing project (code already exists, no docs yet):
+## Rules
 
-The goal is to describe what already exists — not to redesign it. Read the codebase first, then fill in the documents to reflect reality.
+### BR-001: [Rule Name]
 
-Do not scan the entire repository at once. Work module by module.
+| Field | Value |
+|---|---|
+| **Rule ID** | BR-001 |
+| **Description** | [What the rule enforces] |
+| **Reason** | [Why this rule exists] |
+| **Owner** | [System / Role / Team] |
+| **Enforcement Layer** | [Frontend page guard / Backend middleware / Service layer / Database constraint / All layers] |
+| **Impact** | [What happens when the rule is violated] |
 
-Step 1 — Understand the system (read before writing anything):
-1. Read the entry point to understand the overall structure
-   (e.g. main file, router, app bootstrap, CLI entry, index)
-2. Read the data layer to understand the data model
-   (e.g. Prisma schema, SQL DDL, ORM models, migration files)
-3. Read one complete vertical slice to understand the layering pattern
-   (e.g. controller → service → repository, view → serializer → model, handler → usecase → store)
+### BR-002: [Rule Name]
 
-Step 1b — Run the module inventory scan:
-
-   python3 docs/script/scan_codebase.py <src_dir> --docs docs
-
-Review the output with the user:
-- ✅ folders are confirmed as documented
-- ❌ folders → ask the user: "Is this a module that needs documentation, a shared utility, or something else?"
-- — folders → confirm they do not need a flow file
-
-Classify every folder before proceeding. Do not proceed until the user confirms the inventory is complete.
-
-Step 1c — Code Quality Check:
-Read and follow code-quality-check.md. Do not proceed to Step 2 until the check is complete and acknowledged by the user.
-
-Step 2 — Fill in architecture and spec documents (describe what exists):
-1. Create docs/architecture/architecture.md — describe the actual components and data flows found.
-   Then run: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
-   Note: the architecture diagram is injected into `architecture/architecture.md` by `build_pdf.py`.
-   The page structure component diagram (from `codebase-map.md`) is injected into `codebase-map.md`
-   — run `python3 docs/script/component_to_html.py docs/codebase-map.md` after updating the
-   component block in codebase-map.md.
-2. Create docs/architecture/backend.md — describe the actual stack, layering, and module pattern.
-   Use the real layer names from the codebase — do not assume Controller/Service/Repository.
-   Then run: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
-3. Create docs/architecture/frontend.md (if applicable) — describe the actual frontend structure.
-   Then run: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
-4. Create docs/architecture/database.md — describe the actual entities and key relationships.
-5. Create docs/architecture/deployment.md — describe the actual services and startup flow.
-6. Create docs/specs/data-model.md — fill in from the actual schema file.
-   Then run: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
-   (output must go inside docs/ so build_pdf.py can find it)
-   Then run: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
-7. Create docs/specs/api-contract.md — fill in from the actual routes and controllers.
-8. Create docs/specs/permissions.md — fill in from the actual auth middleware and role logic.
-   Then run: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
-9. Create docs/business/business-process.md — describe the actual business workflows supported.
-10. Create docs/business/business-objects.md — describe the actual business entities.
-11. Create docs/business/business-rules.md — describe the actual constraints enforced in code.
-12. Create docs/specs/research.md — document the technology choices already made and why (if known).
-
-Step 3 — Fill in module flow files (one module at a time, following the confirmed inventory from Step 1b):
-
-For each module in the confirmed inventory:
-0. Verify docs/modules/module-data-flow.md contains a "## Module Types" section defining
-   Feature / Background Job / Shared Utility. If it is missing (older copy of this template),
-   copy the current templates/modules/module-data-flow-v2.md content into it before proceeding —
-   do not invent your own module type definitions.
-1. Determine the module type: Feature / Background Job / Shared Utility
-   (follow the rules in docs/modules/module-data-flow.md)
-2. Create docs/modules/[module]/[module]-module-data-flow.md following the matching format.
-   Use real function names and file paths from the actual code.
-   Then run: `python3 docs/script/class_to_html.py docs/modules/[module]/[module]-module-data-flow.md`
-3. Update docs/modules/module-data-flow.md index with the new module entry.
-4. Update docs/codebase-map.md with the files in this module.
-
-After all modules are documented, re-run the inventory scan to confirm full coverage:
-   python3 docs/script/scan_codebase.py <src_dir> --docs docs
-If any ❌ remain, document those modules before proceeding to Step 4.
-
-Step 4 — Fill in project status documents:
-1. Create docs/project-requirements.md — reconstruct from the actual features that exist.
-   Mark anything uncertain as [NEEDS CLARIFICATION].
-2. Create docs/project-plan.md — list all modules found. Mark all existing ones as completed.
-   Add any known remaining work as incomplete tasks.
-3. Create docs/current-state.md — set the Current Task to the next incomplete item in project-plan.md,
-   or write "Documentation retrofit complete — ready for new tasks" if everything is done.
-
-Step 5 — Generate the PDF:
-
-Before running build_pdf.py, verify flow tables are not empty:
-1. Open `docs/modules/module-data-flow.md` — if the Module Flow Files table contains only placeholder rows (no real module names), Step 3 is incomplete. Finish all module flow files first.
-2. Open `docs/modules/module-flow.md` — same check for the Flow Files table.
-Do not generate the PDF with empty flow index tables.
-
-`python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
+| Field | Value |
+|---|---|
+| **Rule ID** | BR-002 |
+| **Description** | [What the rule enforces] |
+| **Reason** | [Why this rule exists] |
+| **Owner** | [System / Role / Team] |
+| **Enforcement Layer** | [Frontend page guard / Backend middleware / Service layer / Database constraint / All layers] |
+| **Impact** | [What happens when the rule is violated] |
 
 ---
 
-If continuing an existing project:
-Read:
-1. AGENTS.md
-2. docs/current-state.md
-3. Required Context only
+## Approval Rules
 
-Required Context should contain only the documents required to complete the Current Task.
-Required Context Do not include:
-- docs/project-plan.md
-- docs/project-requirements.md
-- docs/changelog.md
+<!--
+  API / Trigger column: describe whatever entry point enforces this rule.
+  e.g. HTTP endpoint, CLI command, queue message type, UI action, cron job.
+-->
 
-unless the task explicitly requires them.
-
-Do not scan repository.
-
-For what each document is for and when it changes, read document-purposes.md — reference only, not required every task.
+| Action | Required approver | Trigger | Rejection response |
+|---|---|---|---|
+| [e.g., Role change] | Admin | [e.g., POST /api/roles / admin CLI command] | [e.g., 403 / error message] |
+| [Action] | [Approver] | [Trigger] | [Response] |
 
 ---
 
-## Development Principles
+## Validation Rules
 
-- Prefer maintainable architecture over temporary shortcuts
-- Maintainability First
-- Package First
-- Glue Code
-- Incremental Changes
-- No Unrelated Refactor
+| Rule | Condition checked | Failure behavior |
+|---|---|---|
+| [e.g., Report date range] | `from ≤ to` | 400 before DB query |
+| [Rule] | [Condition] | [Failure behavior] |
 
 ---
 
-## Package First
+## Notification Rules
 
-Priority:
-1. Existing package
-2. Existing utility
-3. Framework convention
-4. Custom code
-
-Custom code only for:
-- Business Logic
-- Domain Rules
-- Data Mapping
-- System Integration
+| When | Who receives | Method |
+|---|---|---|
+| [e.g., Alarm fires] | [e.g., Users in AlarmRuleRecipient] | [e.g., Push notification] |
+| [Trigger] | [Recipient] | [Method] |
 
 ---
 
-## Current State
+## Audit Rules
 
-docs/current-state.md is the active task.
-
-Before starting work:
-* Read docs/current-state.md.
-* If Current Task exists:
-  * Read Required Context.
-  * Start implementation.
-* Otherwise:
-  * Read docs/project-plan.md.
-  * Select the next incomplete task.
-  * Update docs/current-state.md.
-  * Start implementation.
-
-After task completion:
-
-1. Move Current Task to docs/changelog.md.
-2. Mark the task completed in docs/project-plan.md.
-3. Update docs/modules/module-data-flow.md with actual function names and file paths from the implementation.
-4. Update docs/codebase-map.md with the files touched in this task, classified by layer (DB/BE/FE/MOD/JOB) and type (Package/Custom).
-5. Run the Document Update Checklist below. For each item, check yes/no — do not skip the check.
-6. Run the Module Completion Check below. Do not skip this check, even if the answer is usually "no."
-7. Select the next incomplete task from docs/project-plan.md.
-8. Update docs/current-state.md.
-9. Update Required Context.
-
-### Module Completion Check
-
-Run this check after every task — most of the time the answer will be "no," but the check itself must not be skipped.
-
-* Does completing this task finish all work for its module in docs/project-plan.md?
-  * If no: this module is not yet complete. Skip the rest of this section.
-  * If yes: this module is now complete. Do all of the following:
-    1. Insert logger calls into the module's code, following the rules in docs/specs/logging-spec.md.
-       Use the logger instantiation pattern defined in logging-spec.md for this project's language/framework.
-       Direct print/console statements are not allowed.
-       logging-spec.md itself is the rule definition — do not add module-specific content to it.
-       Create or update docs/modules/<module-name>/log-<module-name>.md to list every log point added, in call order.
-    2. Ask: "Would you like to add debug instrumentation to this module? (follows debug-instrumentation-rules.md)"
-       * If yes: follow debug-instrumentation-rules.md and instrument the module.
-       * If no: continue.
-    3. If the module flow file contains multiple sequence or class blocks, each block
-       generates its own diagram file (named by title slug). All are picked up automatically
-       by build_pdf.py — no extra configuration needed.
-    4. Regenerate the English PDF — no need to ask, just run:
-       `python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en.pdf`
-       Chinese PDF is manual only — run when requested:
-       `python3 docs/script/translate_docs.py docs --out docs-zh`
-       `python3 docs/script/build_pdf.py docs-zh --lang zh -o docs/project-documentation-zh.pdf`
-       Note: to add a new doc to the PDF, add it to docs/script/pdf_allowlist.py only —
-       do not edit build_pdf.py or translate_docs.py for this purpose.
-
-### Document Update Checklist
-
-Run through every item below after every task. This is mandatory, not optional.
-
-- [ ] docs/specs/research.md — did this task involve a new technology decision, or resolve a NEEDS CLARIFICATION? If yes, update. Note: research.md is excluded from the PDF by default (pdf_allowlist.py) — uncomment its entry once it has real content.
-- [ ] docs/specs/data-model.md — did the schema, entities, relationships, or indexes change? If yes, update, then:
-  - Regenerate ERD: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
-    (output must go inside docs/ so build_pdf.py can find it)
-  - Regenerate state diagram: `python3 docs/script/state_to_html.py docs/specs/data-model.md`
-  State Machine Consistency check: if this task touched an entity with a status lifecycle, confirm the State Machine section here matches the canonical definition in docs/business/[object-name]-object.md exactly. If they differ, update this file to match — the object file wins.
-- [ ] docs/specs/api-contract.md — were endpoints added/changed, did error codes or validation rules change, or were WebSocket/Socket.IO events / GraphQL queries or mutations / gRPC methods / CLI commands added or changed? If yes, update the relevant protocol section.
-  API Endpoint Overlap check: if this task added an endpoint whose purpose overlaps with an existing one (e.g. two endpoints affecting the same state), add a **Design Note:** under each explaining why they are separate, or consolidate into one.
-- [ ] docs/specs/permissions.md — were roles, the permission matrix, or API endpoints changed? If yes, update, then regenerate use case diagram: `python3 docs/script/usecase_to_html.py docs/specs/permissions.md`
-  After updating: cross-check every role listed as "Responsible role" in any `*-process.md` against the API Endpoint Access table and Page Access Matrix. If a role is responsible for an action but has no access to the required page or endpoint, this is a logical contradiction — resolve it before proceeding.
-- [ ] docs/architecture/architecture.md — did components or data flows change? If yes, update, then regenerate diagram: `python3 docs/script/architecture_to_html.py docs/architecture/architecture.md`
-- [ ] docs/codebase-map.md Page Structure block — did the frontend page/screen structure change? If yes, update the component block, then regenerate: `python3 docs/script/component_to_html.py docs/codebase-map.md`
-- [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
-- [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
-- [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
-- [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
-- [ ] docs/specs/quickstart.md — did setup steps, prerequisites, or verification steps change? If yes, update.
-- [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/modules/<module-name>/log-<module-name>.md.
-- [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
-- [ ] docs/business/[object-name]-object.md — were business entities added or changed? If yes, update, then regenerate state diagram: `python3 docs/script/state_to_html.py docs/business/<object-name>-object.md`
-- [ ] docs/business/business-objects.md — was a new business object file created or did relationships change? If yes, update the index.
-- [ ] docs/business/[process-name]-process.md — did the business workflow, decision points, or exceptions change for this process? If yes, update, then regenerate activity diagram: `python3 docs/script/activity_to_html.py docs/business/<process-name>-process.md`
-- [ ] docs/business/business-process.md — was a new business process file created? If yes, add a row to the index table.
-- [ ] docs/modules/[module]/[module]-module-data-flow.md — did function names, file paths, or flow steps change for this module? If yes, update, then regenerate class diagram: `python3 docs/script/class_to_html.py docs/modules/<module>/<module>-module-data-flow.md`
-- [ ] docs/modules/module-data-flow.md index table — open the file and verify the current module has a row in the Module Flow Files table. If the row is missing, add it now. Do not rely on memory — read the file.
-- [ ] docs/modules/[module]/[module]-flow.md — did cross-module service calls change for this module? If yes, update, then regenerate sequence diagram: `python3 docs/script/sequence_to_html.py docs/modules/<module>/<module>-flow.md`
-- [ ] docs/modules/module-flow.md index table — open the file and verify the current module has a row in the Flow Files table (only if a [module]-flow.md exists for this module). If the row is missing, add it now. Do not rely on memory — read the file.
-
-For the full explanation of why each document updates on these triggers, see document-purposes.md.
-
----
-
-## Task Completion
-
-Return:
-- Verification
+| Action | What is retained |
+|---|---|
+| [e.g., Alarm acknowledgement] | [e.g., acknowledgedBy, acknowledgedAt] |
+| [Action] | [Retained data] |
