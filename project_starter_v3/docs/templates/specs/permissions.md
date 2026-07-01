@@ -146,41 +146,54 @@
 -->
 
 ```usecase
-title: [System Name] — Access Control
+title: [System Name] — Use Case Overview
+system: [System Name]
 
-actor Guest
-actor User
+# ── Actors ─────────────────────────────────────────────────────────────────
+# Use actor inheritance to avoid drawing the same line from every actor.
+# The top-level actor inherits all use cases of actors below it.
+# Example hierarchy: Admin > Supervisor > Operator
+#
+# actor Admin                    ← can do everything
+# actor Supervisor extends Admin ← can do what Operator can, plus more
+# actor Operator                 ← base-level user
+
 actor Admin
+actor Supervisor extends Admin
+actor Operator
 
-# [Feature A]
-usecase "[Feature A] Read" as UC1
-usecase "[Feature A] Create" as UC2
-usecase "[Feature A] Update Own" as UC3
-usecase "[Feature A] Delete Own" as UC4
-usecase "[Feature A] Manage All" as UC5
+# ── Use cases ───────────────────────────────────────────────────────────────
+# Use verb-oriented names: "Monitor X", "Generate Y", "Manage Z", "Configure X"
+# Keep all use cases at the same abstraction level (user goals, not UI pages or entities)
+# ❌ "Dashboard"  ✔ "Monitor production status"
+# ❌ "Equipment"  ✔ "View equipment details"
+# ❌ "Reports"    ✔ "Generate performance report"
 
-# [Feature B]
-usecase "[Feature B] Read" as UC6
-usecase "[Feature B] Create" as UC7
-usecase "[Feature B] Manage All" as UC8
+# Core operations (all authenticated users)
+usecase "Monitor production status" as UC1
+usecase "View [resource] details"   as UC2
 
-# [Admin only]
-usecase "[Admin Feature] Configure" as UC9
+# Supervisor-level operations
+usecase "Analyse [domain] data"     as UC3
+usecase "Generate [X] report"       as UC4
 
-Guest --> UC1
-User --> UC1
-User --> UC2
-User --> UC3
-User --> UC4
-User --> UC6
-User --> UC7
-Admin --> UC1
-Admin --> UC2
-Admin --> UC3
-Admin --> UC4
-Admin --> UC5
-Admin --> UC6
-Admin --> UC7
-Admin --> UC8
-Admin --> UC9
+# Admin-only operations
+usecase "Manage [resource]"         as UC5
+usecase "Configure system settings" as UC6
+
+# ── Access lines ────────────────────────────────────────────────────────────
+# Only draw lines that are NOT covered by inheritance.
+# If Admin extends Supervisor, do NOT repeat Supervisor's lines for Admin.
+
+Operator    --> UC1
+Operator    --> UC2
+Supervisor  --> UC3
+Supervisor  --> UC4
+Admin       --> UC5
+Admin       --> UC6
+
+# ── Use case relationships ──────────────────────────────────────────────────
+# <<include>>  — UC always calls another UC as part of its flow
+# <<extend>>   — UC optionally extends another UC under certain conditions
+# UC4 ..> UC1 : <<include>>
 ```
