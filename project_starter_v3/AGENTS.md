@@ -78,7 +78,8 @@ Step 2 — Fill in architecture and spec documents (describe what exists):
 3. Create docs/architecture/frontend.md (if applicable) — describe the actual frontend structure.
    Then run: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 4. Create docs/architecture/database.md — describe the actual entities and key relationships.
-5. Create docs/architecture/deployment.md — describe the actual services and startup flow.
+5. Create docs/architecture/deployment.md — describe the actual services, startup flow, and deployment topology.
+   Then run: `python3 docs/script/component_to_html.py docs/architecture/deployment.md`
 6. Create docs/specs/data-model.md — fill in from the actual schema file.
    Then run: `python3 docs/script/schema_to_html.py <schema file> -o docs/specs/schema.html`
    (output must go inside docs/ so build_pdf.py can find it)
@@ -250,7 +251,7 @@ Run through every item below after every task. This is mandatory, not optional.
 - [ ] docs/architecture/backend.md — did backend layering, stack, or module pattern change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/backend.md`
 - [ ] docs/architecture/frontend.md — did frontend stack, page structure, or component strategy change? If yes, update, then regenerate component diagram: `python3 docs/script/component_to_html.py docs/architecture/frontend.md`
 - [ ] docs/architecture/database.md — did main entities or relationships change (conceptual level)? If yes, update.
-- [ ] docs/architecture/deployment.md — did services, env vars, or build/deploy flow change? If yes, update.
+- [ ] docs/architecture/deployment.md — did services, env vars, build/deploy flow, or deployment topology change? If yes, update, then regenerate deployment diagram: `python3 docs/script/component_to_html.py docs/architecture/deployment.md`
 - [ ] docs/specs/quickstart.md — did setup steps, prerequisites, or verification steps change? If yes, update.
 - [ ] docs/specs/logging-spec.md Module Naming Convention table — does this task introduce a module name not yet listed? If yes, add one line (name + short description) to the table. Do not add module-specific logging detail here — that belongs in docs/modules/<module-name>/log-<module-name>.md.
 - [ ] docs/business/business-rules.md — did business constraints or policies change? If yes, update.
