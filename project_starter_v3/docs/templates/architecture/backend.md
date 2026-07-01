@@ -103,23 +103,46 @@ Avoid:
 -->
 
 ```component
-title: Backend Module Structure
+title: Backend Architecture
 
-component "[Layer 1 name]" as Layer1 {
-  provides: [what this layer exposes]
-  requires: Layer2
+# ── Rules ──────────────────────────────────────────────────────────────────
+# Use package grouping to show layers.
+# Entry points (controllers/handlers) should NOT depend on each other.
+# Only draw real import/call dependencies.
+# Keep provides/requires to 2-4 items — no internal method signatures.
+
+package "Entry Point" {
+  component "[Controller / Handler / Router A]" as CtrlA {
+    provides: [routes or RPC methods it handles]
+    requires: [Service it calls]
+  }
+  component "[Controller / Handler / Router B]" as CtrlB {
+    provides: [routes or RPC methods it handles]
+    requires: [Service it calls]
+  }
 }
 
-component "[Layer 2 name]" as Layer2 {
-  provides: [what this layer exposes]
-  requires: Layer3
+package "Application / Domain" {
+  component "[Service or UseCase A]" as SvcA {
+    provides: [business operations it exposes]
+    requires: [Repository or external service]
+  }
 }
 
-component "[Layer 3 name / Data layer]" as Layer3 {
-  provides: [what this layer exposes]
-  requires: [data store name]
+package "Infrastructure" {
+  component "[Repository / Store / Adapter]" as Repo {
+    provides: [data access methods]
+    requires: [Database]
+  }
+  component "[External Service Adapter]" as ExtSvc {
+    provides: [integration methods]
+    requires: [External API]
+  }
 }
 
-Layer1 --> Layer2 : [relationship, e.g., calls / delegates to / uses]
-Layer2 --> Layer3 : [relationship]
+# Only draw lines for real dependency/call relationships
+CtrlA --> SvcA
+CtrlB --> SvcA
+SvcA  --> Repo
+SvcA  --> ExtSvc
 ```
