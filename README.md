@@ -196,7 +196,7 @@ append a type suffix to the output filename to avoid collisions (e.g. `data-mode
 | `activity_to_html.py` | any `.md` (one or more activity blocks) | Activity flow | `business/*-process.md` |
 | `sequence_to_html.py` | any `.md` (one or more sequence blocks) | Sequence | `modules/[module]/[module]-flow.md` |
 | `class_to_html.py` | any `.md` (one or more class blocks) | Class structure | `modules/[module]/*-module-data-flow.md` |
-| `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` / `codebase-map.md` |
+| `component_to_html.py` | any `.md` (component block) | Component | `backend.md` / `frontend.md` / `deployment.md` / `codebase-map.md` |
 
 > **Multiple blocks per file:** all six UML scripts support multiple diagram blocks in a
 > single `.md` file. Each block generates its own HTML + SVG pair, named by its `title:`
