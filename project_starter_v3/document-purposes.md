@@ -145,12 +145,18 @@ Update when:
 ### deployment.md
 Purpose:
 Describe runtime structure — services, environment variables, local startup flow,
-build/deploy flow. Includes Cache Policy section for any caching layer.
+build/deploy flow, and deployment topology. Includes Cache Policy section for any
+caching layer. The Deployment Diagram component block shows which service runs where
+and how they connect in the actual deployment environment.
 
 Update when:
 * Services, env vars, or build/deploy flow changes
+* Deployment topology changes (new service, new hosting platform, new network path)
 * A caching layer is added or its TTL / invalidation strategy changes
 * Cache boundary conditions or consumer behaviour is clarified
+
+After updating the Deployment Diagram block, regenerate the diagram:
+`python3 docs/script/component_to_html.py docs/architecture/deployment.md`
 
 ---
 
