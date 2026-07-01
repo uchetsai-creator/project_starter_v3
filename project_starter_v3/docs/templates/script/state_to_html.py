@@ -131,6 +131,31 @@ def compute_positions(states):
     return pos
 
 
+def edge_point(from_pos, to_pos):
+    """Find the point on the destination node border that the arrow should point to.
+    Uses ellipse approximation for the rounded-rect node."""
+    x, y   = to_pos['x'], to_pos['y']    # destination centre
+    fx, fy = from_pos['x'], from_pos['y'] # source centre
+    hw = NODE_W // 2                       # half-width
+    hh = NODE_H // 2 + 2                   # half-height (slight padding)
+    dx, dy = x - fx, y - fy
+    if dx == 0 and dy == 0:
+        return x, y - hh
+    # Parametric line: P(t) = (fx + t*dx, fy + t*dy)
+    # Intersect with ellipse (X/hw)^2 + (Y/hh)^2 = 1 where X=P-centre
+    # => ((fx+t*dx-x)/hw)^2 + ((fy+t*dy-y)/hh)^2 = 1
+    # Since dx=x-fx, dy=y-fy: at t=1 we're at centre.
+    # Solve for intersection from outside (t < 1):
+    # ((-dx+t*dx)/hw)^2 + ((-dy+t*dy)/hh)^2 = 1
+    # ((t-1)*dx/hw)^2 + ((t-1)*dy/hh)^2 = 1
+    # (t-1)^2 * ((dx/hw)^2 + (dy/hh)^2) = 1
+    a = (dx/hw)**2 + (dy/hh)**2
+    if a == 0:
+        return x, y - hh
+    t = 1 - 1/(a**0.5)
+    return fx + t*dx, fy + t*dy
+
+
 def build_svg(title, states, transitions):
     pos = compute_positions(states)
 
@@ -167,7 +192,16 @@ def build_svg(title, states, transitions):
     for t in transitions:
         p1 = resolve(t['src'], True)
         p2 = resolve(t['dst'], False)
-        x1, y1, x2, y2 = p1['x'], p1['y'], p2['x'], p2['y']
+        # Source: if real node, start from its border; if [*], use raw position
+        if t['src'] != '[*]' and t['src'] in pos:
+            x1, y1 = edge_point(p2, p1)
+        else:
+            x1, y1 = p1['x'], p1['y']
+        # Destination: if real node, end at its border; if [*], use raw position
+        if t['dst'] != '[*]' and t['dst'] in pos:
+            x2, y2 = edge_point(p1, p2)
+        else:
+            x2, y2 = p2['x'], p2['y']
 
         # Offset slightly for parallel edges
         dx, dy = x2 - x1, y2 - y1
