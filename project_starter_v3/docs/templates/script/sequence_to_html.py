@@ -1,266 +1,358 @@
 #!/usr/bin/env python3
-"""sequence_to_html.py — sequence diagram markdown → Interactive HTML + Static SVG
+"""activity_to_html.py — activity diagram markdown → Interactive HTML + Static SVG
 
 Input format (inside a markdown file):
-```sequence
-title: Create Order Flow
+```activity
+title: Order Processing Flow
 
-Client -> API Gateway: POST /orders [auth token]
-API Gateway -> Order Service: create(input)
-Order Service -> PostgreSQL: INSERT order
-PostgreSQL --> Order Service: order record
-Order Service -> Message Queue: publish OrderCreated
-Message Queue --> Order Service: ack
-Order Service --> API Gateway: 201 Created
-API Gateway --> Client: 201 {orderId}
+start
+:Receive Order;
+if (Stock available?) then (yes)
+  :Reserve Stock;
+  :Process Payment;
+  if (Payment OK?) then (yes)
+    :Confirm Order;
+    :Send Confirmation Email;
+  else (no)
+    :Release Stock;
+    :Notify Payment Failed;
+  endif
+else (no)
+  :Notify Out of Stock;
+endif
+stop
 ```
 
 Syntax rules:
-  A -> B: message        synchronous call (solid arrow →)
-  A --> B: message       return / async response (dashed arrow ⇢)
-  A -x B: message        failed call (solid arrow with X)
-  # comment              ignored
-  title: <text>          optional diagram title
+  start                       start node
+  stop                        end node
+  :Action Label;              action (step)
+  if (condition?) then (yes)  decision branch start
+  else (no)                   else branch
+  endif                       end of decision
+  fork                        parallel split (basic, renders as note)
+  join                        parallel join
+  # comment                   ignored
+  title: <text>               optional diagram title
 
 Outputs:
-  <name>.html  — interactive (hover to highlight, pan/zoom)
+  <name>.html  — interactive (pan/zoom)
   <name>.svg   — static (for PDF embedding)
 
 Usage:
-  python3 sequence_to_html.py <input.md> [-o output.html]
+  python3 activity_to_html.py <input.md> [-o output.html]
 """
-import sys, os, re, math, json
+import sys, os, re
 
-# ── Parser ──────────────────────────────────────────────────────────────────
+# ── Parser ───────────────────────────────────────────────────────────────────
 
-def parse_sequence(content):
+def parse_activity(content):
     # Accept either a full markdown file or a raw block string
-    if '```sequence' in content:
-        _m = re.search(r'```sequence\s*(.*?)```', content, re.DOTALL)
+    if '```activity' in content:
+        _m = re.search(r'```activity\s*(.*?)```', content, re.DOTALL)
         raw = _m.group(1) if _m else content
     else:
         raw = content
 
     title = ""
-    participants = []
-    seen = {}
-    messages = []
+    nodes = []   # list of node dicts
+    edges = []   # list of {src, dst, label}
+
+    def add(node):
+        nodes.append(node)
+        return len(nodes) - 1
+
+    branch_stack = []  # stack of {if_idx, else_idx, ends: []}
+    decision_labels = {}  # decision node idx -> {'yes': label, 'no': label}
+    prev = None
+
+    def connect(src, dst, label=''):
+        if src is not None:
+            edges.append({'src': src, 'dst': dst, 'label': label})
 
     for line in raw.splitlines():
         line = line.strip()
-        if not line or line.startswith('#'):
-            continue
+        if not line or line.startswith('#'): continue
         if line.lower().startswith('title:'):
-            title = line[6:].strip()
-            continue
+            title = line[6:].strip(); continue
 
-        # A -> B: msg  |  A --> B: msg  |  A -x B: msg
-        m = re.match(r'^(.+?)\s*(-->|-x|->)\s*(.+?):\s*(.*)$', line)
-        if m:
-            src, arrow, dst, msg = m.group(1).strip(), m.group(2), m.group(3).strip(), m.group(4).strip()
-            for p in (src, dst):
-                if p not in seen:
-                    seen[p] = len(participants)
-                    participants.append(p)
-            kind = 'return' if arrow == '-->' else ('fail' if arrow == '-x' else 'call')
-            messages.append({'src': src, 'dst': dst, 'msg': msg, 'kind': kind})
+        if line == 'start':
+            idx = add({'type': 'start'})
+            prev = idx
 
-    return title, participants, messages
+        elif line == 'stop':
+            idx = add({'type': 'stop'})
+            connect(prev, idx)
+            prev = idx
+
+        elif re.match(r'^:.+;$', line):
+            label = line[1:-1].strip()
+            idx = add({'type': 'action', 'label': label})
+            connect(prev, idx)
+            prev = idx
+
+        elif line.lower().startswith('if '):
+            m = re.match(r'^if\s*\((.+?)\)\s*then\s*\((.+?)\)', line, re.IGNORECASE)
+            cond = m.group(1) if m else line
+            yes_label = m.group(2) if m else 'yes'
+            idx = add({'type': 'decision', 'label': cond})
+            connect(prev, idx)
+            branch_stack.append({'if_idx': idx, 'yes_label': yes_label, 'prev_yes': idx, 'prev_else': None, 'ends': []})
+            decision_labels[idx] = {'yes': yes_label}
+            prev = idx
+
+        elif line.lower().startswith('else'):
+            m = re.match(r'^else\s*\((.+?)\)', line, re.IGNORECASE)
+            no_label = m.group(1) if m else 'no'
+            if branch_stack:
+                branch_stack[-1]['prev_else'] = prev
+                branch_stack[-1]['no_label'] = no_label
+                if_idx = branch_stack[-1]['if_idx']
+                if if_idx in decision_labels:
+                    decision_labels[if_idx]['no'] = no_label
+                prev = branch_stack[-1]['if_idx']
+
+        elif line.lower() == 'endif':
+            if branch_stack:
+                frame = branch_stack.pop()
+                merge_idx = add({'type': 'merge'})
+                connect(prev, merge_idx)
+                if frame['prev_else'] is not None:
+                    connect(frame['prev_else'], merge_idx)
+                prev = merge_idx
+
+        elif line.lower() == 'fork':
+            idx = add({'type': 'fork', 'label': 'fork'})
+            connect(prev, idx)
+            prev = idx
+
+        elif line.lower() == 'join':
+            idx = add({'type': 'join', 'label': 'join'})
+            connect(prev, idx)
+            prev = idx
+
+    # Fix edges: for decision nodes, label yes/no on outgoing edges
+    for frame in []:  # already handled inline
+        pass
+
+    # Retroactively label yes/no edges from decisions
+    # (rebuild edge labels for decision -> next action)
+    # Simple approach: first edge from decision = yes, second = no
+    decision_edge_count = {}
+    for e in edges:
+        src = e['src']
+        if src < len(nodes) and nodes[src]['type'] == 'decision':
+            decision_edge_count[src] = decision_edge_count.get(src, 0) + 1
+
+    decision_edge_seen = {}
+    for e in edges:
+        src = e['src']
+        if src < len(nodes) and nodes[src]['type'] == 'decision' and not e['label']:
+            count = decision_edge_seen.get(src, 0)
+            labels = decision_labels.get(src, {})
+            if count == 0:
+                e['label'] = labels.get('yes', 'yes')
+            else:
+                e['label'] = labels.get('no', 'no')
+            decision_edge_seen[src] = count + 1
+
+    return title, nodes, edges
 
 
-# ── SVG builder ─────────────────────────────────────────────────────────────
+# ── Layout ───────────────────────────────────────────────────────────────────
+
+NODE_W, NODE_H = 160, 34
+V_STEP = 60
+MARGIN = 50
+DEC_SIZE = 28
 
 COLORS = {
-    'head_bg':   '#1A365D',
-    'head_fg':   '#FFFFFF',
-    'life_line': '#CBD5E0',
-    'call':      '#3182CE',
-    'return':    '#718096',
-    'fail':      '#E53E3E',
-    'box_bg':    '#EBF8FF',
-    'box_bd':    '#BEE3F8',
-    'bg':        '#F7FAFC',
-    'msg_fg':    '#2D3748',
-    'self_bg':   '#FEF3C7',
+    'bg':       '#F7FAFC',
+    'action_bg':'#EBF8FF',
+    'action_bd':'#3182CE',
+    'action_fg':'#1A365D',
+    'dec_bg':   '#FEFCBF',
+    'dec_bd':   '#D69E2E',
+    'dec_fg':   '#744210',
+    'merge_bg': '#F0FFF4',
+    'merge_bd': '#38A169',
+    'start_bg': '#1A365D',
+    'stop_bg':  '#1A365D',
+    'arrow':    '#4A5568',
+    'label_fg': '#718096',
+    'title_fg': '#1A365D',
+    'fork_bg':  '#2D3748',
 }
 
-BOX_W, BOX_H = 120, 32
-H_GAP = 60   # horizontal gap between participant centres
-V_START = 70  # y where lifelines start
-MSG_H = 44   # vertical space per message
-MARGIN = 40
+
+def wrap_text(text, max_chars=22):
+    """Wrap text into multiple lines at word boundaries, max_chars per line."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
 
 
-def build_svg(title, participants, messages):
-    n = len(participants)
-    centres = [MARGIN + BOX_W // 2 + i * (BOX_W + H_GAP) for i in range(n)]
-    idx = {p: i for i, p in enumerate(participants)}
+def node_height(label, base_height=NODE_H, line_height=14, max_chars=22):
+    """Compute the height needed for a node based on wrapped text line count."""
+    lines = wrap_text(label, max_chars)
+    extra_lines = max(0, len(lines) - 1)
+    return base_height + extra_lines * line_height
 
-    total_w = centres[-1] + BOX_W // 2 + MARGIN if centres else 400
-    total_h = V_START + (len(messages) + 1) * MSG_H + 40
 
-    parts = [
+
+def build_svg(title, nodes, edges):
+    cx = MARGIN + NODE_W // 2
+    positions = []
+    heights = []
+    y = MARGIN + 40
+    for node in nodes:
+        label = node.get('label', '')
+        h = node_height(label) if node['type'] in ('action', 'decision') else NODE_H
+        heights.append(h)
+        positions.append({'x': cx, 'y': y, 'h': h})
+        y += V_STEP + h
+
+    # Decision diamonds can be wider than NODE_W when labels are long — widen canvas to fit
+    max_label_chars = max((len(n.get('label', '')) for n in nodes if n['type'] == 'decision'), default=0)
+    decision_extra_w = max(0, max_label_chars * 5.5 - NODE_W // 2) if max_label_chars else 0
+    total_w = NODE_W + MARGIN * 2 + int(decision_extra_w * 2)
+    total_h = y + MARGIN
+
+    svg = [
         f'<svg viewBox="0 0 {total_w} {total_h}" xmlns="http://www.w3.org/2000/svg" '
         f'font-family="Segoe UI, Arial, sans-serif">',
+        '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">'
+        f'<path d="M0,0 L0,6 L8,3 z" fill="{COLORS["arrow"]}"/></marker></defs>',
         f'<rect width="{total_w}" height="{total_h}" fill="{COLORS["bg"]}"/>',
     ]
 
-    # Title
     if title:
-        parts.append(
-            f'<text x="{total_w//2}" y="22" text-anchor="middle" '
-            f'font-size="14" font-weight="bold" fill="{COLORS["head_bg"]}">{title}</text>'
+        svg.append(
+            f'<text x="{total_w//2}" y="24" text-anchor="middle" font-size="14" '
+            f'font-weight="bold" fill="{COLORS["title_fg"]}">{title}</text>'
         )
 
-    # Participant boxes
-    for i, p in enumerate(participants):
-        cx = centres[i]
-        x = cx - BOX_W // 2
-        parts.append(
-            f'<rect x="{x}" y="{V_START - BOX_H}" width="{BOX_W}" height="{BOX_H}" '
-            f'rx="6" fill="{COLORS["head_bg"]}"/>'
+    # Edges
+    for e in edges:
+        p1, p2 = positions[e['src']], positions[e['dst']]
+        n1, n2 = nodes[e['src']], nodes[e['dst']]
+        x1, y1 = p1['x'], p1['y'] + p1['h'] // 2
+        x2, y2 = p2['x'], p2['y'] - p2['h'] // 2
+        if n1['type'] == 'start':
+            y1 = p1['y'] + 10
+        if n1['type'] == 'stop':
+            y1 = p1['y'] + 10
+        if n2['type'] == 'stop':
+            y2 = p2['y'] - 10
+        svg.append(
+            f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
+            f'stroke="{COLORS["arrow"]}" stroke-width="1.6" marker-end="url(#arr)"/>'
         )
-        parts.append(
-            f'<text x="{cx}" y="{V_START - BOX_H//2 + 5}" text-anchor="middle" '
-            f'fill="{COLORS["head_fg"]}" font-size="11" font-weight="bold">{p}</text>'
-        )
-
-    # Lifelines
-    life_end = V_START + (len(messages) + 1) * MSG_H
-    for cx in centres:
-        parts.append(
-            f'<line x1="{cx}" y1="{V_START}" x2="{cx}" y2="{life_end}" '
-            f'stroke="{COLORS["life_line"]}" stroke-width="1.5" stroke-dasharray="4,3"/>'
-        )
-
-    # Messages
-    for mi, msg in enumerate(messages):
-        y = V_START + (mi + 1) * MSG_H
-        si, di = idx[msg['src']], idx[msg['dst']]
-        x1, x2 = centres[si], centres[di]
-        color = COLORS[msg['kind']]
-        dash = '6,3' if msg['kind'] == 'return' else ''
-        label = msg['msg']
-
-        if si == di:
-            # Self-call loop
-            lx = x1 + 12
-            parts.append(
-                f'<path d="M {x1},{y} Q {x1+50},{y} {x1+50},{y+15} Q {x1+50},{y+30} {x1},{y+30}" '
-                f'stroke="{color}" stroke-width="1.8" fill="none"'
-                + (f' stroke-dasharray="{dash}"' if dash else '') + '/>'
-            )
-            parts.append(
-                f'<polygon points="{x1},{y+30} {x1-5},{y+22} {x1+5},{y+22}" fill="{color}"/>'
-            )
-            parts.append(
-                f'<text x="{x1+54}" y="{y+16}" font-size="10" fill="{COLORS["msg_fg"]}">{label}</text>'
-            )
-        else:
-            mx = (x1 + x2) / 2
-            parts.append(
-                f'<line x1="{x1}" y1="{y}" x2="{x2}" y2="{y}" '
-                f'stroke="{color}" stroke-width="1.8"'
-                + (f' stroke-dasharray="{dash}"' if dash else '') + '/>'
-            )
-            # Arrowhead
-            if msg['kind'] == 'fail':
-                parts.append(f'<text x="{x2-8 if x2>x1 else x2+2}" y="{y+5}" font-size="13" fill="{color}">✕</text>')
-            else:
-                direction = 1 if x2 > x1 else -1
-                ax = x2 - direction * 10
-                parts.append(
-                    f'<polygon points="{x2},{y} {ax},{y-5} {ax},{y+5}" fill="{color}"/>'
+        if e.get('label'):
+            mx, my = (x1+x2)/2, (y1+y2)/2
+            label_lines = wrap_text(e['label'], max_chars=18)
+            for li, lline in enumerate(label_lines):
+                safe_lline = lline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{mx+6}" y="{my + li * 11}" font-size="9" fill="{COLORS["label_fg"]}">{safe_lline}</text>'
                 )
-            # Label
-            parts.append(
-                f'<rect x="{mx-50}" y="{y-16}" width="100" height="16" rx="3" '
-                f'fill="{COLORS["box_bg"]}" stroke="{COLORS["box_bd"]}" stroke-width="0.8"/>'
+
+    # Nodes
+    for i, node in enumerate(nodes):
+        p = positions[i]
+        cx_, cy_ = p['x'], p['y']
+
+        if node['type'] == 'start':
+            svg.append(f'<circle cx="{cx_}" cy="{cy_}" r="10" fill="{COLORS["start_bg"]}"/>')
+
+        elif node['type'] == 'stop':
+            svg.append(f'<circle cx="{cx_}" cy="{cy_}" r="10" fill="{COLORS["stop_bg"]}"/>')
+            svg.append(f'<circle cx="{cx_}" cy="{cy_}" r="6" fill="{COLORS["bg"]}"/>')
+            svg.append(f'<circle cx="{cx_}" cy="{cy_}" r="4" fill="{COLORS["stop_bg"]}"/>')
+
+        elif node['type'] == 'action':
+            h = p['h']
+            x = cx_ - NODE_W // 2
+            y = cy_ - h // 2
+            svg.append(
+                f'<rect x="{x}" y="{y}" width="{NODE_W}" height="{h}" rx="6" '
+                f'fill="{COLORS["action_bg"]}" stroke="{COLORS["action_bd"]}" stroke-width="1.8"/>'
             )
-            parts.append(
-                f'<text x="{mx}" y="{y-4}" text-anchor="middle" font-size="9.5" '
-                f'fill="{COLORS["msg_fg"]}">{label}</text>'
+            lines = wrap_text(node['label'])
+            line_h = 14
+            start_y = cy_ - (len(lines) - 1) * line_h / 2 + 4
+            for li, line in enumerate(lines):
+                safe_line = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{cx_}" y="{start_y + li * line_h}" text-anchor="middle" font-size="11" '
+                    f'fill="{COLORS["action_fg"]}">{safe_line}</text>'
+                )
+
+        elif node['type'] == 'decision':
+            lines = wrap_text(node['label'], max_chars=16)
+            # Scale diamond size to fit wrapped text — widen and heighten for longer labels
+            s = max(DEC_SIZE, DEC_SIZE * 0.55 * len(lines) + 14)
+            longest_line = max((len(l) for l in lines), default=1)
+            half_w = max(s * 1.8, longest_line * 5.5)
+            svg.append(
+                f'<polygon points="{cx_},{cy_-s} {cx_+half_w},{cy_} {cx_},{cy_+s} {cx_-half_w},{cy_}" '
+                f'fill="{COLORS["dec_bg"]}" stroke="{COLORS["dec_bd"]}" stroke-width="1.8"/>'
+            )
+            line_h = 12
+            start_y = cy_ - (len(lines) - 1) * line_h / 2 + 3.5
+            for li, line in enumerate(lines):
+                safe = line.replace('&', '&amp;').replace('<', '&lt;')
+                svg.append(
+                    f'<text x="{cx_}" y="{start_y + li * line_h}" text-anchor="middle" font-size="9.5" '
+                    f'fill="{COLORS["dec_fg"]}">{safe}</text>'
+                )
+
+        elif node['type'] == 'merge':
+            s = DEC_SIZE * 0.6
+            svg.append(
+                f'<polygon points="{cx_},{cy_-s} {cx_+s*1.8},{cy_} {cx_},{cy_+s} {cx_-s*1.8},{cy_}" '
+                f'fill="{COLORS["merge_bg"]}" stroke="{COLORS["merge_bd"]}" stroke-width="1.5"/>'
             )
 
-    parts.append('</svg>')
-    return '\n'.join(parts)
+        elif node['type'] in ('fork', 'join'):
+            svg.append(
+                f'<rect x="{cx_-60}" y="{cy_-5}" width="120" height="10" '
+                f'rx="2" fill="{COLORS["fork_bg"]}"/>'
+            )
 
+    svg.append('</svg>')
+    return '\n'.join(svg)
 
-# ── Interactive HTML ─────────────────────────────────────────────────────────
 
 HTML_TEMPLATE = r"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>{title}</title>
-<style>
-* {{ box-sizing: border-box; margin: 0; padding: 0; }}
-body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #F7FAFC; overflow: hidden; }}
-#wrap {{ position: fixed; inset: 0; overflow: hidden; cursor: grab; }}
-#wrap:active {{ cursor: grabbing; }}
-#stage {{ position: absolute; transform-origin: 0 0; padding: 24px; }}
-.msg-hit {{ cursor: pointer; }}
-.msg-hit:hover rect {{ fill: #BEE3F8; }}
-#tooltip {{
-  position: fixed; background: #2D3748; color: #E2E8F0;
-  font-size: 11px; padding: 6px 10px; border-radius: 6px;
-  pointer-events: none; display: none; z-index: 999;
-  border: 1px solid #4A5568; white-space: nowrap;
-}}
-#hint {{
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-  background: #2D3748; color: #90CDF4; font-size: 11px;
-  padding: 5px 14px; border-radius: 20px; pointer-events: none;
-  z-index: 999; border: 1px solid #4A5568;
-}}
-</style>
-</head>
-<body>
-<div id="wrap">
-  <div id="stage">
-    {svg_content}
-  </div>
-</div>
-<div id="tooltip"></div>
+<html lang="en"><head><meta charset="UTF-8"><title>{title}</title>
+<style>*{{box-sizing:border-box;margin:0;padding:0;}}body{{font-family:'Segoe UI',Arial,sans-serif;background:#F7FAFC;overflow:hidden;}}#wrap{{position:fixed;inset:0;overflow:hidden;cursor:grab;}}#wrap:active{{cursor:grabbing;}}#stage{{position:absolute;transform-origin:0 0;padding:24px;}}#hint{{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2D3748;color:#90CDF4;font-size:11px;padding:5px 14px;border-radius:20px;pointer-events:none;z-index:999;border:1px solid #4A5568;}}</style>
+</head><body>
+<div id="wrap"><div id="stage">{svg_content}</div></div>
 <div id="hint">Scroll to zoom · Drag to pan</div>
 <script>
-const wrap = document.getElementById('wrap');
-let scale = 1, px = 0, py = 0;
-let panning = false, lmx = 0, lmy = 0;
+const wrap=document.getElementById('wrap');let scale=1,px=0,py=0,panning=false,lmx=0,lmy=0;
+wrap.addEventListener('wheel',e=>{{e.preventDefault();const d=e.deltaY>0?.9:1.1;const ns=Math.min(Math.max(scale*d,.2),5);const r=wrap.getBoundingClientRect();px=e.clientX-r.left-(e.clientX-r.left-px)*(ns/scale);py=e.clientY-r.top-(e.clientY-r.top-py)*(ns/scale);scale=ns;applyT();}},{{passive:false}});
+wrap.addEventListener('mousedown',e=>{{panning=true;lmx=e.clientX;lmy=e.clientY;}});
+window.addEventListener('mouseup',()=>panning=false);
+window.addEventListener('mousemove',e=>{{if(panning){{px+=e.clientX-lmx;py+=e.clientY-lmy;lmx=e.clientX;lmy=e.clientY;applyT();}}}});
+function applyT(){{document.getElementById('stage').style.transform=`translate(${{px}}px,${{py}}px) scale(${{scale}})`;}}
+</script></body></html>"""
 
-wrap.addEventListener('wheel', e => {{
-  e.preventDefault();
-  const d = e.deltaY > 0 ? 0.9 : 1.1;
-  const ns = Math.min(Math.max(scale * d, 0.2), 5);
-  const r = wrap.getBoundingClientRect();
-  px = e.clientX - r.left - (e.clientX - r.left - px) * (ns / scale);
-  py = e.clientY - r.top  - (e.clientY - r.top  - py) * (ns / scale);
-  scale = ns; applyT();
-}}, {{ passive: false }});
-
-wrap.addEventListener('mousedown', e => {{ panning = true; lmx = e.clientX; lmy = e.clientY; }});
-window.addEventListener('mouseup', () => {{ panning = false; }});
-window.addEventListener('mousemove', e => {{
-  if (panning) {{ px += e.clientX - lmx; py += e.clientY - lmy; lmx = e.clientX; lmy = e.clientY; applyT(); }}
-}});
-
-function applyT() {{
-  document.getElementById('stage').style.transform = `translate(${{px}}px,${{py}}px) scale(${{scale}})`;
-}}
-</script>
-</body>
-</html>"""
-
-
-def build_html(title, svg_content):
-    return HTML_TEMPLATE.replace('{title}', title or 'Sequence Diagram').replace('{svg_content}', svg_content)
-
-
-# ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 sequence_to_html.py <input.md> [-o output.html]"); sys.exit(1)
+        print("Usage: python3 activity_to_html.py <input.md> [-o output.html]"); sys.exit(1)
     input_path = sys.argv[1]
     base_output = sys.argv[3] if len(sys.argv) > 3 and sys.argv[2] == '-o' else None
 
@@ -270,20 +362,20 @@ def main():
     with open(input_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Find ALL ```sequence blocks in the file
-    blocks = list(re.finditer(r'```sequence\s*(.*?)```', content, re.DOTALL))
+    # Find ALL ```activity blocks in the file
+    blocks = list(re.finditer(r'```activity\s*(.*?)```', content, re.DOTALL))
     if not blocks:
-        print("No ```sequence block found. Check your syntax."); sys.exit(1)
+        print("No ```activity block found. Check your syntax."); sys.exit(1)
 
-    # Strip existing suffix from base stem to avoid doubling (e.g. file-sequence-sequence.html)
+    # Strip existing suffix from base stem to avoid doubling (e.g. file-activity-activity.html)
     base_stem = os.path.splitext(base_output or input_path)[0]
-    if base_stem.endswith('-sequence'):
-        base_stem = base_stem[:-len('-sequence')]
+    if base_stem.endswith('-activity'):
+        base_stem = base_stem[:-len('-activity')]
 
     generated = 0
 
     for idx, match in enumerate(blocks):
-        result = parse_sequence(match.group(1))
+        result = parse_activity(match.group(1))
         title  = result[0] or ""
 
         # Single block → keep original naming; multiple → append title slug or index
@@ -293,11 +385,11 @@ def main():
             slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-') if title else str(idx + 1)
             out_stem = base_stem + f'-{slug}'
 
-        output_path = out_stem + '-sequence.html'
-        svg_path    = out_stem + '-sequence.svg'
+        output_path = out_stem + '-activity.html'
+        svg_path    = out_stem + '-activity.svg'
 
         svg        = build_svg(*result)
-        html_title = title or 'Sequence Diagram'
+        html_title = title or 'Activity Diagram'
 
         _write_html = globals().get('build_html', None)
         with open(output_path, 'w', encoding='utf-8') as f:
