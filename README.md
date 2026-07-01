@@ -34,13 +34,19 @@ project_starter/                     ← this repo (template only)
     ├── changelog.md                 ← completed task history
     ├── codebase-map.md              ← package vs. custom code, by layer; includes project tree
     │
-    ├── specs/                        ← includes quickstart.md, research.md, data-model.md, etc.
+    ├── specs/                        ← quickstart.md, research.md, data-model.md, api-contract.md,
+    │                                     permissions.md, logging-spec.md, glossary.md,
+    │                                     dependencies.md, test-plan.md, test-report.md
     │   ├── quickstart.md            ← setup steps, prerequisites, local startup, verification
     │   ├── research.md              ← technology decisions + alternatives considered (excluded from PDF until filled)
     │   ├── data-model.md            ← schema, indexes, state machines, migrations
     │   ├── api-contract.md          ← endpoints, events, validation rules, error codes (REST + WebSocket + GraphQL + gRPC + CLI)
     │   ├── permissions.md           ← roles, permission matrix, endpoint access control
-    │   └── logging-spec.md          ← logging rules, logger instantiation, module naming
+    │   ├── logging-spec.md          ← logging rules, logger instantiation, module naming
+    │   ├── glossary.md              ← business terms, technical terms, abbreviations
+    │   ├── dependencies.md          ← runtime packages, dev packages, external services, infrastructure
+    │   ├── test-plan.md             ← testing strategy, scope, environment, CI integration
+    │   └── test-report.md           ← test results, pass/fail summary, coverage, known issues
     │
     ├── architecture/
     │   ├── architecture.md          ← components, data flow, structured YAML for diagram
@@ -286,6 +292,9 @@ are auto-scanned and do not need to be added manually.
   are caught at the start, not discovered at the end.
 - **Three module types**: Feature (request-driven), Background Job (event/schedule-driven), and
   Shared Utility (no entry point). Each has its own flow format in `module-data-flow.md`.
+- **Six-chapter PDF structure**: the generated PDF is organized into Introduction / Plan /
+  Design / Build / Test / Deployment — matching standard system analysis document conventions.
+  The chapter each file belongs to is configured in `pdf_allowlist.py`.
 - **Single PDF allowlist**: `pdf_allowlist.py` is the only file to edit when adding documents
   to the PDF. Both `build_pdf.py` and `translate_docs.py` import from it.
 - **Task granularity**: each task should be roughly half a day to one day of work, and
