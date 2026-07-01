@@ -105,6 +105,23 @@ def parse_component(content):
 # ── Layout / SVG ─────────────────────────────────────────────────────────────
 
 CARD_W = 200
+
+
+def wrap_text(text, max_chars=22):
+    """Wrap text into multiple lines at word boundaries."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
 HEAD_H = 32
 IFACE_H = 18
 COLS = 3
@@ -128,12 +145,12 @@ COLORS = {
 
 
 def card_height(comp):
-    n_prov = len(comp['provides'])
-    n_req  = len(comp['requires'])
+    prov_lines = sum(len(wrap_text(p, max_chars=22)) for p in comp['provides'])
+    req_lines  = sum(len(wrap_text(r, max_chars=22)) for r in comp['requires'])
     sections = 0
-    if n_prov: sections += 1
-    if n_req:  sections += 1
-    return HEAD_H + (n_prov + n_req + sections) * IFACE_H + 8
+    if comp['provides']: sections += 1
+    if comp['requires']: sections += 1
+    return HEAD_H + (prov_lines + req_lines + sections) * IFACE_H + 8
 
 
 def compute_positions(components):
@@ -189,9 +206,12 @@ def build_svg(title, components, relations):
         )
         if r['label']:
             mx, my = (x1+x2)/2 + 4, (y1+y2)/2
-            svg.append(
-                f'<text x="{mx}" y="{my}" font-size="9" fill="{COLORS["label_fg"]}" font-style="italic">{r["label"]}</text>'
-            )
+            rel_lines = wrap_text(r['label'], max_chars=18)
+            for li, rline in enumerate(rel_lines):
+                safe_rline = rline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{mx}" y="{my + li*11}" font-size="9" fill="{COLORS["label_fg"]}" font-style="italic">{safe_rline}</text>'
+                )
 
     # Component cards
     for alias, comp in components.items():
@@ -223,11 +243,15 @@ def build_svg(title, components, relations):
             )
             cy += IFACE_H
             for prov in comp['provides']:
-                svg.append(
-                    f'<text x="{x+12}" y="{cy+IFACE_H//2+4}" font-size="10" '
-                    f'fill="{COLORS["prov_fg"]}">▸ {prov}</text>'
-                )
-                cy += IFACE_H
+                prov_lines = wrap_text(prov, max_chars=22)
+                for li, pline in enumerate(prov_lines):
+                    safe_pline = pline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    prefix = '▸ ' if li == 0 else '  '
+                    svg.append(
+                        f'<text x="{x+12}" y="{cy+IFACE_H//2+4+li*11}" font-size="10" '
+                        f'fill="{COLORS["prov_fg"]}">{prefix}{safe_pline}</text>'
+                    )
+                cy += IFACE_H + (len(prov_lines) - 1) * 11
 
         if comp['requires']:
             svg.append(
@@ -236,11 +260,15 @@ def build_svg(title, components, relations):
             )
             cy += IFACE_H
             for req in comp['requires']:
-                svg.append(
-                    f'<text x="{x+12}" y="{cy+IFACE_H//2+4}" font-size="10" '
-                    f'fill="{COLORS["req_fg"]}">◂ {req}</text>'
-                )
-                cy += IFACE_H
+                req_lines = wrap_text(req, max_chars=22)
+                for li, qline in enumerate(req_lines):
+                    safe_qline = qline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    prefix = '◂ ' if li == 0 else '  '
+                    svg.append(
+                        f'<text x="{x+12}" y="{cy+IFACE_H//2+4+li*11}" font-size="10" '
+                        f'fill="{COLORS["req_fg"]}">{prefix}{safe_qline}</text>'
+                    )
+                cy += IFACE_H + (len(req_lines) - 1) * 11
 
     svg.append('</svg>')
     return '\n'.join(svg)
