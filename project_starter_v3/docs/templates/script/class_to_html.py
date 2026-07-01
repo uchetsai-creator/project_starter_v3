@@ -106,6 +106,45 @@ def parse_class(content):
 # ── Layout ───────────────────────────────────────────────────────────────────
 
 CARD_W = 200
+
+
+def wrap_text(text, max_chars=24):
+    """Wrap text into multiple lines at word boundaries."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
+
+
+def wrap_member(text, max_chars=26):
+    """Wrap a method/field signature, preferring to break at commas or parens."""
+    if len(text) <= max_chars:
+        return [text]
+    # Try splitting at the last comma before max_chars, else hard wrap
+    parts = []
+    remaining = text
+    while len(remaining) > max_chars:
+        break_at = remaining.rfind(',', 0, max_chars)
+        if break_at == -1:
+            break_at = remaining.rfind('(', 0, max_chars)
+        if break_at == -1 or break_at < max_chars * 0.4:
+            break_at = max_chars
+        else:
+            break_at += 1
+        parts.append(remaining[:break_at].rstrip())
+        remaining = remaining[break_at:].lstrip()
+    if remaining:
+        parts.append(remaining)
+    return parts or [text]
 HEAD_H = 32
 MEM_H  = 20
 COLS   = 3
@@ -133,7 +172,8 @@ VISIBILITY = {'+': COLORS['pub_fg'], '-': COLORS['priv_fg'], '#': COLORS['prot_f
 
 
 def card_height(cls):
-    return HEAD_H + max(len(cls['members']), 1) * MEM_H + 8
+    total_lines = sum(len(wrap_member(m)) for m in cls['members'])
+    return HEAD_H + max(total_lines, 1) * MEM_H + 8
 
 
 def compute_positions(classes):
@@ -196,9 +236,12 @@ def build_svg(title, classes, relations):
         )
         if r['label']:
             mx, my = (x1+x2)/2, (y1+y2)/2
-            svg.append(
-                f'<text x="{mx+4}" y="{my}" font-size="9" fill="{color}" font-style="italic">{r["label"]}</text>'
-            )
+            rel_lines = wrap_text(r['label'], max_chars=20)
+            for li, rline in enumerate(rel_lines):
+                safe_rline = rline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{mx+4}" y="{my + li*11}" font-size="9" fill="{color}" font-style="italic">{safe_rline}</text>'
+                )
 
     # Class cards
     for name, cls in classes.items():
@@ -226,14 +269,20 @@ def build_svg(title, classes, relations):
                 f'<line x1="{x}" y1="{y+HEAD_H}" x2="{x+CARD_W}" y2="{y+HEAD_H}" '
                 f'stroke="{COLORS["card_bd"]}" stroke-width="1"/>'
             )
-            for mi, mem in enumerate(cls['members']):
-                my = y + HEAD_H + mi * MEM_H + MEM_H // 2 + 4
+            mem_cursor = y + HEAD_H
+            for mem in cls['members']:
                 vis = mem[0] if mem and mem[0] in VISIBILITY else ''
                 color = VISIBILITY.get(vis, COLORS['mem_fg'])
-                safe_mem = mem.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                svg.append(
-                    f'<text x="{x+8}" y="{my}" font-size="9.5" fill="{color}" font-family="monospace">{safe_mem}</text>'
-                )
+                mem_lines = wrap_member(mem)
+                for li, mline in enumerate(mem_lines):
+                    safe_mline = mline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    my = mem_cursor + li * MEM_H + MEM_H // 2 + 4
+                    # Indent continuation lines slightly so the wrap is visually distinct
+                    mx = x + 8 if li == 0 else x + 16
+                    svg.append(
+                        f'<text x="{mx}" y="{my}" font-size="9.5" fill="{color}" font-family="monospace">{safe_mline}</text>'
+                    )
+                mem_cursor += len(mem_lines) * MEM_H
 
     svg.append('</svg>')
     return '\n'.join(svg)
