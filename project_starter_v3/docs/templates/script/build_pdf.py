@@ -57,6 +57,7 @@ DIAGRAM_TARGETS = {
     "architecture-component":  "architecture/architecture.md",
     "backend-component":       "architecture/backend.md",
     "frontend-component":      "architecture/frontend.md",
+    "deployment-component":    "architecture/deployment.md",
     # Page structure component diagram — injected into codebase-map as project overview
     "codebase-map-component":  "codebase-map.md",
     # activity/sequence/*-class are matched dynamically in inject_diagrams
@@ -96,12 +97,19 @@ python3 docs/script/build_pdf.py docs --lang en -o docs/project-documentation-en
 ```
 """,
         "sections": {
-            "requirements":   "Requirements",
-            "specifications": "Specifications",
-            "architecture":   "Architecture",
-            "business":       "Business",
-            "flows":          "Flows",
-            "project":        "Project Status",
+            "introduction":   "1. Introduction",
+            "plan":           "2. Plan",
+            "design":         "3. Design",
+            "build":          "4. Build",
+            "test":           "5. Test",
+            "deployment":     "6. Deployment",
+            # legacy keys kept for backward compatibility
+            "requirements":   "1. Introduction",
+            "specifications": "3. Design",
+            "architecture":   "3. Design",
+            "business":       "1. Introduction",
+            "flows":          "4. Build",
+            "project":        "4. Build",
         },
     },
     "zh": {
@@ -131,12 +139,19 @@ python3 docs/script/build_pdf.py docs-zh --lang zh -o docs/project-documentation
 ```
 """,
         "sections": {
-            "requirements":   "需求",
-            "specifications": "規格",
-            "architecture":   "架構",
-            "business":       "業務",
-            "flows":          "流程",
-            "project":        "專案狀態",
+            "introduction":   "一、系統介紹",
+            "plan":           "二、開發計畫",
+            "design":         "三、系統設計",
+            "build":          "四、建構實作",
+            "test":           "五、測試",
+            "deployment":     "六、部署",
+            # legacy keys kept for backward compatibility
+            "requirements":   "一、系統介紹",
+            "specifications": "三、系統設計",
+            "architecture":   "三、系統設計",
+            "business":       "一、系統介紹",
+            "flows":          "四、建構實作",
+            "project":        "四、建構實作",
         },
     },
 }
@@ -162,7 +177,7 @@ def find_allowed_files(docs_dir, strings):
         else:
             print(f"Warning: allowlisted file not found, skipping: {rel}")
 
-    flows_label = strings["sections"]["flows"]
+    flows_label = strings["sections"]["build"]
     for path in sorted(glob.glob(os.path.join(docs_dir, "modules", "*", "*-module-data-flow.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
@@ -175,7 +190,7 @@ def find_allowed_files(docs_dir, strings):
             result.insert(-1, (rel, path, flows_label))
 
     # Auto-include *-process.md files under business/ (one file per business process)
-    business_label = strings["sections"]["business"]
+    business_label = strings["sections"]["introduction"]
     for path in sorted(glob.glob(os.path.join(docs_dir, "business", "*-process.md"))):
         rel = os.path.relpath(path, docs_dir)
         if rel not in seen:
