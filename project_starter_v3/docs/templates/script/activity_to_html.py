@@ -63,6 +63,7 @@ def parse_activity(content):
         return len(nodes) - 1
 
     branch_stack = []  # stack of {if_idx, else_idx, ends: []}
+    decision_labels = {}  # decision node idx -> {'yes': label, 'no': label}
     prev = None
 
     def connect(src, dst, label=''):
@@ -97,6 +98,7 @@ def parse_activity(content):
             idx = add({'type': 'decision', 'label': cond})
             connect(prev, idx)
             branch_stack.append({'if_idx': idx, 'yes_label': yes_label, 'prev_yes': idx, 'prev_else': None, 'ends': []})
+            decision_labels[idx] = {'yes': yes_label}
             prev = idx
 
         elif line.lower().startswith('else'):
@@ -105,6 +107,9 @@ def parse_activity(content):
             if branch_stack:
                 branch_stack[-1]['prev_else'] = prev
                 branch_stack[-1]['no_label'] = no_label
+                if_idx = branch_stack[-1]['if_idx']
+                if if_idx in decision_labels:
+                    decision_labels[if_idx]['no'] = no_label
                 prev = branch_stack[-1]['if_idx']
 
         elif line.lower() == 'endif':
@@ -144,10 +149,11 @@ def parse_activity(content):
         src = e['src']
         if src < len(nodes) and nodes[src]['type'] == 'decision' and not e['label']:
             count = decision_edge_seen.get(src, 0)
+            labels = decision_labels.get(src, {})
             if count == 0:
-                e['label'] = 'yes'
+                e['label'] = labels.get('yes', 'yes')
             else:
-                e['label'] = 'no'
+                e['label'] = labels.get('no', 'no')
             decision_edge_seen[src] = count + 1
 
     return title, nodes, edges
@@ -179,15 +185,47 @@ COLORS = {
 }
 
 
+def wrap_text(text, max_chars=22):
+    """Wrap text into multiple lines at word boundaries, max_chars per line."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
+
+
+def node_height(label, base_height=NODE_H, line_height=14, max_chars=22):
+    """Compute the height needed for a node based on wrapped text line count."""
+    lines = wrap_text(label, max_chars)
+    extra_lines = max(0, len(lines) - 1)
+    return base_height + extra_lines * line_height
+
+
+
 def build_svg(title, nodes, edges):
     cx = MARGIN + NODE_W // 2
     positions = []
+    heights = []
     y = MARGIN + 40
     for node in nodes:
-        positions.append({'x': cx, 'y': y})
-        y += V_STEP + NODE_H
+        label = node.get('label', '')
+        h = node_height(label) if node['type'] in ('action', 'decision') else NODE_H
+        heights.append(h)
+        positions.append({'x': cx, 'y': y, 'h': h})
+        y += V_STEP + h
 
-    total_w = NODE_W + MARGIN * 2
+    # Decision diamonds can be wider than NODE_W when labels are long — widen canvas to fit
+    max_label_chars = max((len(n.get('label', '')) for n in nodes if n['type'] == 'decision'), default=0)
+    decision_extra_w = max(0, max_label_chars * 5.5 - NODE_W // 2) if max_label_chars else 0
+    total_w = NODE_W + MARGIN * 2 + int(decision_extra_w * 2)
     total_h = y + MARGIN
 
     svg = [
@@ -208,8 +246,8 @@ def build_svg(title, nodes, edges):
     for e in edges:
         p1, p2 = positions[e['src']], positions[e['dst']]
         n1, n2 = nodes[e['src']], nodes[e['dst']]
-        x1, y1 = p1['x'], p1['y'] + NODE_H // 2
-        x2, y2 = p2['x'], p2['y'] - NODE_H // 2
+        x1, y1 = p1['x'], p1['y'] + p1['h'] // 2
+        x2, y2 = p2['x'], p2['y'] - p2['h'] // 2
         if n1['type'] == 'start':
             y1 = p1['y'] + 10
         if n1['type'] == 'stop':
@@ -222,9 +260,12 @@ def build_svg(title, nodes, edges):
         )
         if e.get('label'):
             mx, my = (x1+x2)/2, (y1+y2)/2
-            svg.append(
-                f'<text x="{mx+6}" y="{my}" font-size="9" fill="{COLORS["label_fg"]}">{e["label"]}</text>'
-            )
+            label_lines = wrap_text(e['label'], max_chars=18)
+            for li, lline in enumerate(label_lines):
+                safe_lline = lline.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{mx+6}" y="{my + li * 11}" font-size="9" fill="{COLORS["label_fg"]}">{safe_lline}</text>'
+                )
 
     # Nodes
     for i, node in enumerate(nodes):
@@ -240,28 +281,41 @@ def build_svg(title, nodes, edges):
             svg.append(f'<circle cx="{cx_}" cy="{cy_}" r="4" fill="{COLORS["stop_bg"]}"/>')
 
         elif node['type'] == 'action':
+            h = p['h']
             x = cx_ - NODE_W // 2
-            y = cy_ - NODE_H // 2
+            y = cy_ - h // 2
             svg.append(
-                f'<rect x="{x}" y="{y}" width="{NODE_W}" height="{NODE_H}" rx="6" '
+                f'<rect x="{x}" y="{y}" width="{NODE_W}" height="{h}" rx="6" '
                 f'fill="{COLORS["action_bg"]}" stroke="{COLORS["action_bd"]}" stroke-width="1.8"/>'
             )
-            svg.append(
-                f'<text x="{cx_}" y="{cy_+5}" text-anchor="middle" font-size="11" '
-                f'fill="{COLORS["action_fg"]}">{node["label"]}</text>'
-            )
+            lines = wrap_text(node['label'])
+            line_h = 14
+            start_y = cy_ - (len(lines) - 1) * line_h / 2 + 4
+            for li, line in enumerate(lines):
+                safe_line = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{cx_}" y="{start_y + li * line_h}" text-anchor="middle" font-size="11" '
+                    f'fill="{COLORS["action_fg"]}">{safe_line}</text>'
+                )
 
         elif node['type'] == 'decision':
-            s = DEC_SIZE
+            lines = wrap_text(node['label'], max_chars=16)
+            # Scale diamond size to fit wrapped text — widen and heighten for longer labels
+            s = max(DEC_SIZE, DEC_SIZE * 0.55 * len(lines) + 14)
+            longest_line = max((len(l) for l in lines), default=1)
+            half_w = max(s * 1.8, longest_line * 5.5)
             svg.append(
-                f'<polygon points="{cx_},{cy_-s} {cx_+s*1.8},{cy_} {cx_},{cy_+s} {cx_-s*1.8},{cy_}" '
+                f'<polygon points="{cx_},{cy_-s} {cx_+half_w},{cy_} {cx_},{cy_+s} {cx_-half_w},{cy_}" '
                 f'fill="{COLORS["dec_bg"]}" stroke="{COLORS["dec_bd"]}" stroke-width="1.8"/>'
             )
-            safe = node['label'].replace('&', '&amp;').replace('<', '&lt;')
-            svg.append(
-                f'<text x="{cx_}" y="{cy_+4}" text-anchor="middle" font-size="9.5" '
-                f'fill="{COLORS["dec_fg"]}">{safe}</text>'
-            )
+            line_h = 12
+            start_y = cy_ - (len(lines) - 1) * line_h / 2 + 3.5
+            for li, line in enumerate(lines):
+                safe = line.replace('&', '&amp;').replace('<', '&lt;')
+                svg.append(
+                    f'<text x="{cx_}" y="{start_y + li * line_h}" text-anchor="middle" font-size="9.5" '
+                    f'fill="{COLORS["dec_fg"]}">{safe}</text>'
+                )
 
         elif node['type'] == 'merge':
             s = DEC_SIZE * 0.6
