@@ -201,11 +201,11 @@ def build_svg(title, system, actors, usecases, relations):
         f'<svg viewBox="0 0 {total_w} {total_h}" xmlns="http://www.w3.org/2000/svg" '
         f'font-family="Segoe UI, Arial, sans-serif">',
         f'<defs>'
-        f'<marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">'
+        f'<marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">'
         f'<path d="M0,0 L0,6 L8,3 z" fill="{COLORS["arrow"]}"/></marker>'
-        f'<marker id="arr_dep" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">'
+        f'<marker id="arr_dep" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">'
         f'<path d="M0,0 L0,6 L8,3 z" fill="{COLORS["dep_dash"]}"/></marker>'
-        f'<marker id="arr_inh" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">'
+        f'<marker id="arr_inh" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">'
         f'<polygon points="0,0 12,6 0,12" fill="none" stroke="{COLORS["inherit"]}" stroke-width="1.5"/>'
         f'</marker>'
         f'</defs>',
