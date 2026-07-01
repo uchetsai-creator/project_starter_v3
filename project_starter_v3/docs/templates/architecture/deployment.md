@@ -176,3 +176,51 @@ How to confirm the system is running correctly after startup.
 ```bash
 [command to stop all services]
 ```
+
+---
+
+## Deployment Diagram
+
+<!--
+  Describes the deployment topology — which services run where and how they connect.
+  Fill in based on the actual deployment environment (cloud provider, container runtime, etc.)
+  After writing, run: python3 docs/script/component_to_html.py docs/architecture/deployment.md
+
+  Examples of deployment topologies:
+    Single server:   App + DB on the same VM
+    Docker Compose:  Each service in its own container, same host
+    Kubernetes:      Each service as a Deployment/Pod, connected via Service
+    Serverless:      Functions + managed DB + CDN
+    PaaS:            Railway / Render / Fly.io / Heroku managed services
+
+  Use component blocks to show which service runs on which host/platform,
+  and how they communicate (HTTP, TCP, internal network, etc.)
+-->
+
+```component
+title: Deployment Topology
+
+component "[e.g., Frontend — Vercel / Nginx / CDN]" as FE {
+  provides: [e.g., static assets, SPA]
+  requires: [e.g., Backend API]
+}
+
+component "[e.g., Backend — Docker container / Railway / EC2]" as BE {
+  provides: [e.g., REST API, WebSocket]
+  requires: [e.g., Database, Cache]
+}
+
+component "[e.g., Database — RDS / Supabase / self-hosted PostgreSQL]" as DB {
+  provides: [e.g., persistent storage]
+  requires:
+}
+
+component "[e.g., Cache — Redis Cloud / ElastiCache]" as Cache {
+  provides: [e.g., session store, query cache]
+  requires:
+}
+
+FE --> BE : [e.g., HTTPS]
+BE --> DB : [e.g., TCP / connection pool]
+BE --> Cache : [e.g., TCP]
+```
