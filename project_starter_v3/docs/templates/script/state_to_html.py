@@ -83,6 +83,23 @@ def parse_state(content):
 # ── Layout ───────────────────────────────────────────────────────────────────
 
 NODE_W, NODE_H = 120, 36
+
+
+def wrap_text(text, max_chars=16):
+    """Wrap text into multiple lines at word boundaries."""
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) > max_chars and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines or [text]
 H_GAP, V_GAP = 80, 70
 COLS = 3
 MARGIN = 60
@@ -168,20 +185,29 @@ def build_svg(title, states, transitions):
         # Label
         if t['label'] or t['guard']:
             lx, ly = (x1 + x2) / 2 + nx, (y1 + y2) / 2 + ny - 6
-            label_text = t['label']
+            label_lines = wrap_text(t['label'], max_chars=16) if t['label'] else []
             guard_text = f'[{t["guard"]}]' if t['guard'] else ''
+            n_lines = len(label_lines) + (1 if guard_text else 0)
+            box_w = max(72, max((len(l) for l in label_lines), default=0) * 5.5 + 10, len(guard_text) * 5 + 10)
+            box_h = max(14, n_lines * 11 + 4)
+            box_top = ly - 12 - (n_lines - 1) * 11 / 2 if n_lines > 1 else ly - 12
             svg.append(
-                f'<rect x="{lx-36}" y="{ly-12}" width="72" height="14" rx="3" '
+                f'<rect x="{lx-box_w/2}" y="{box_top}" width="{box_w}" height="{box_h}" rx="3" '
                 f'fill="{COLORS["label_bg"]}" opacity="0.9"/>'
             )
-            svg.append(
-                f'<text x="{lx}" y="{ly}" text-anchor="middle" font-size="9" '
-                f'fill="{COLORS["label_fg"]}">{label_text}</text>'
-            )
-            if guard_text:
+            text_y = box_top + 11
+            for line in label_lines:
+                safe_line = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
                 svg.append(
-                    f'<text x="{lx}" y="{ly+12}" text-anchor="middle" font-size="8" '
-                    f'font-style="italic" fill="{COLORS["guard_fg"]}">{guard_text}</text>'
+                    f'<text x="{lx}" y="{text_y}" text-anchor="middle" font-size="9" '
+                    f'fill="{COLORS["label_fg"]}">{safe_line}</text>'
+                )
+                text_y += 11
+            if guard_text:
+                safe_guard = guard_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                svg.append(
+                    f'<text x="{lx}" y="{text_y}" text-anchor="middle" font-size="8" '
+                    f'font-style="italic" fill="{COLORS["guard_fg"]}">{safe_guard}</text>'
                 )
 
     # Arrow marker def
